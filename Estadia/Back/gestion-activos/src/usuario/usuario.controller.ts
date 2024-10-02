@@ -12,6 +12,7 @@ import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Usuario } from './entities/usuario.entity';
+import { LoginUsuarioDto } from './dto/login.dto';
 
 @ApiTags('Usuarios')
 @Controller('usuario')
@@ -32,6 +33,18 @@ export class UsuarioController {
   @ApiResponse({ status: 500, description: 'Ocurrió un error en el servidor' })
   async create(@Body() createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {
     return await this.usuarioService.create(createUsuarioDto);
+  }
+
+  @Post('login')
+  @ApiOperation({ summary: 'Iniciar sesión con credenciales' })
+  @ApiResponse({
+    status: 200,
+    description: 'Inicio de sesión exitoso',
+    type: Usuario,
+  })
+  @ApiResponse({ status: 400, description: 'Credenciales incorrectas' })
+  async login(@Body() loginDto: LoginUsuarioDto): Promise<Usuario> {
+    return await this.usuarioService.login(loginDto);
   }
 
   @Get()

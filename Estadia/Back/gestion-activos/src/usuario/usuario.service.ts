@@ -1,9 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { Usuario } from './entities/usuario.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { LoginUsuarioDto } from './dto/login.dto';
 
 @Injectable()
 export class UsuarioService {
@@ -11,6 +16,20 @@ export class UsuarioService {
     @InjectRepository(Usuario)
     private usuarioRepository: Repository<Usuario>,
   ) {}
+
+  async login(loginDto: LoginUsuarioDto): Promise<Usuario> {
+    const { email, password } = loginDto;
+
+    const usuario = await this.usuarioRepository.findOne({
+      where: { email },
+    });
+
+    if (!usuario || usuario.password !== password) {
+      throw new BadRequestException('Credenciales incorrectas');
+    }
+
+    return usuario; // Devuelve el usuario si las credenciales son correctas
+  }
 
   async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {
     const usuario = this.usuarioRepository.create(createUsuarioDto);
