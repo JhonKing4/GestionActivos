@@ -28,7 +28,7 @@ export class UsuarioService {
       throw new BadRequestException('Credenciales incorrectas');
     }
 
-    return usuario; // Devuelve el usuario si las credenciales son correctas
+    return usuario;
   }
 
   async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {

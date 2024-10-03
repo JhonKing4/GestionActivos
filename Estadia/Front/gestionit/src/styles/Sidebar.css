@@ -3,8 +3,7 @@
   height: 100vh;
   background-color: #e6f0ff;
   padding: 1rem;
-  border-top-right-radius: 1.5rem;
-  border-bottom-right-radius: 1.5rem;
+  border-radius: 1.5rem;
   display: flex;
   flex-direction: column;
 }
@@ -15,7 +14,7 @@
 }
 
 .logo {
-  height: 30px;
+  height: 40px;
   width: auto;
 }
 
@@ -50,4 +49,26 @@
 
 .nav-item span {
   font-size: 0.875rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  color: #333;
+  text-decoration: none;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.nav-item:hover {
+  background-color: rgba(0, 102, 204, 0.1);
+}
+
+.nav-item.active {
+  background-color: #0066cc;
+  color: white;
+}
+
+.nav-item span {
+  margin-left: 12px;
 }
