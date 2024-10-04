@@ -1,29 +1,70 @@
+import { useState, useEffect } from "react";
+import axios from "axios"; // Si usas axios
 import { Pencil, Trash2 } from "lucide-react";
 import Header from "../Extras/header";
 import Side from "../Extras/sidebar";
-import "../../styles/Tabla.css"
+import "../../styles/Tabla.css";
+import DeleteConfirmationModal from "../Extras/DeleteModal";
 
 interface AssignmentItem {
-  nombre: string;
-  correo: string;
-  contraseña: string;
-  rol: string;
+  idUsuario: string;
+  name: string;
+  email: string;
+  password: string;
+  roles: number;
 }
 
 const Usuario = () => {
-  const assignmentData: AssignmentItem[] = [
-    {
-      nombre: "Jhoandi Abraham Ciau Cetz",
-      correo: "jhoandiciaucetz@gmail.com",
-      contraseña: "12345",
-      rol: "Admin",
-    },
-  ];
+  const [users, setUsers] = useState<AssignmentItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/usuario");
+        setUsers(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError("Error fetching users");
+        setLoading(false);
+      }
+    };
+    fetchUsers();
+  }, []);
+  
+  const handleDeleteClick = (id: string) => {
+    setSelectedUser(id);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (selectedUser) {
+      try {
+        await axios.delete(`http://localhost:3001/usuario/${selectedUser}`);
+        setUsers(users.filter((user) => user.idUsuario !== selectedUser));
+        setIsModalOpen(false);
+      } catch (error) {
+        console.error("Error deleting user", error);
+      }
+    }
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedUser(null);
+  };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
+
   return (
     <div className="app-container">
       <Side />
       <div className="main-content">
-        <Header userName="Jhonadi" />
+        <Header userName="Jhoandi" />
         <div className="tabla-content">
           <div className="table-section">
             <div className="section-header">
@@ -38,22 +79,25 @@ const Usuario = () => {
                     <th>Email</th>
                     <th>Contraseña</th>
                     <th>Rol</th>
-                    <th>Action</th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {assignmentData.map((item, index) => (
-                    <tr key={index}>
-                      <td>{item.nombre}</td>
-                      <td>{item.correo}</td>
-                      <td>{item.contraseña}</td>
-                      <td>{item.rol}</td>
+                  {users.map((user) => (
+                    <tr key={user.idUsuario}>
+                      <td>{user.name}</td>
+                      <td>{user.email}</td>
+                      <td>{user.password}</td>
+                      <td>{user.roles === 0 ? "Admin" : "Colaborador"}</td>
                       <td>
                         <div className="action-buttons">
                           <button className="action-btn yellow">
                             <Pencil size={18} />
                           </button>
-                          <button className="action-btn red">
+                          <button
+                            className="action-btn red"
+                            onClick={() => handleDeleteClick(user.idUsuario)}
+                          >
                             <Trash2 size={18} />
                           </button>
                         </div>
@@ -83,8 +127,13 @@ const Usuario = () => {
           </div>
         </div>
       </div>
+      <DeleteConfirmationModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 };
 
-export default Usuario();
+export default Usuario;

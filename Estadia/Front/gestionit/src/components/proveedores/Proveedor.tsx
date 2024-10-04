@@ -1,8 +1,13 @@
 import { Pencil, Trash2 } from "lucide-react";
 import Header from "../Extras/header";
 import Side from "../Extras/sidebar";
+import "../../styles/Tabla.css";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import DeleteConfirmationModal from "../Extras/DeleteModal";
 
 interface AssignmentItem {
+  idProveedor: string;
   name: string;
   phone: string;
   address: string;
@@ -11,16 +16,55 @@ interface AssignmentItem {
 }
 
 const Proveedor = () => {
-  const assignmentData: AssignmentItem[] = [
-    {
-      name: "Lenovo",
-      phone: "9981454665",
-      address:
-        "Carretera Libre 85 Punta Sam, Isla Blanca 85 SM6, Manzana 2 Playa Mujeres, 77400 Costa Mujeres, Q.R.",
-      email: "lenovo@gmail.com",
-      rfc: "123456789102",
-    },
-  ];
+  const [proveedors, setProveedors] = useState<AssignmentItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedProveedors, setSelectedProveedors] = useState<string | null>(
+    null
+  );
+
+  useEffect(() => {
+    const fecthProveedors = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/proveedores");
+        setProveedors(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError("Error fetching Proveedores");
+        setLoading(false);
+      }
+    };
+    fecthProveedors();
+  }, []);
+  const handleDeleteClick = (id: string) => {
+    setSelectedProveedors(id);
+    setIsModalOpen(true);
+  };
+  const handleDeleteConfirm = async () => {
+    if (selectedProveedors) {
+      try {
+        await axios.delete(
+          `http://localhost:3001/proveedores/${selectedProveedors}`
+        );
+        setProveedors(
+          proveedors.filter(
+            (proveedors) => proveedors.idProveedor !== selectedProveedors
+          )
+        );
+        setIsModalOpen(false);
+      } catch (error) {
+        console.error("Error al eliminar el proveedor", error);
+      }
+    }
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedProveedors(null);
+  };
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
   return (
     <div className="app-container">
       <Side />
@@ -45,19 +89,24 @@ const Proveedor = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {assignmentData.map((item, index) => (
-                    <tr key={index}>
-                      <td>{item.name}</td>
-                      <td>{item.phone}</td>
-                      <td>{item.address}</td>
-                      <td>{item.email}</td>
-                      <td>{item.rfc}</td>
+                  {proveedors.map((proveedor) => (
+                    <tr key={proveedor.idProveedor}>
+                      <td>{proveedor.name}</td>
+                      <td>{proveedor.phone}</td>
+                      <td>{proveedor.address}</td>
+                      <td>{proveedor.email}</td>
+                      <td>{proveedor.rfc}</td>
                       <td>
                         <div className="action-buttons">
                           <button className="action-btn yellow">
                             <Pencil size={18} />
                           </button>
-                          <button className="action-btn">
+                          <button
+                            className="action-btn red"
+                            onClick={() =>
+                              handleDeleteClick(proveedor.idProveedor)
+                            }
+                          >
                             <Trash2 size={18} />
                           </button>
                         </div>
@@ -87,8 +136,13 @@ const Proveedor = () => {
           </div>
         </div>
       </div>
+      <DeleteConfirmationModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 };
 
-export default Proveedor();
+export default Proveedor;

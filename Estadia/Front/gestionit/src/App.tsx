@@ -18,13 +18,13 @@ function App() {
         <Routes>
           <Route path="/" element={<Login></Login>} />
           <Route path="/home" element={Home} />
-          <Route path="/asignacion" element={Asignacion} />
-          <Route path="/departamento" element={Departamento} />
-          <Route path="/hotel" element={Hotel} />
-          <Route path="/mantenimiento" element={Mantenimiento} />
-          <Route path="/material" element={Material} />
-          <Route path="/proveedor" element={Proveedor} />
-          <Route path="/usuario" element={Usuario} />
+          <Route path="/asignacion" element={<Asignacion/>} />
+          <Route path="/departamento" element={<Departamento/>} />
+          <Route path="/hotel" element={<Hotel />} />
+          <Route path="/mantenimiento" element={<Mantenimiento/>} />
+          <Route path="/material" element={<Material />} />
+          <Route path="/proveedor" element={<Proveedor/>} />
+          <Route path="/usuario" element={<Usuario />} />
         </Routes>
       </BrowserRouter>
     </div>

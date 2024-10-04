@@ -3,19 +3,70 @@ import Header from "../Extras/header";
 import Side from "../Extras/sidebar";
 import "../../styles/Sidebar.css";
 import "../../styles/Tabla.css";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import DeleteConfirmationModal from "../Extras/DeleteModal";
 
 interface AssignmentItem {
-  nombre: string;
-  descripcion: string;
+  idDepartamento: string;
+  name: string;
+  description: string;
 }
 
 const Departamento = () => {
-  const assignmentData: AssignmentItem[] = [
-    {
-      nombre: "Sistema",
-      descripcion: "G-7893",
-    },
-  ];
+  const [departamentos, setDepartamentos] = useState<AssignmentItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedDepartament, setSelectedDepartament] = useState<string | null>(
+    null
+  );
+
+  useEffect(() => {
+    const fetchDepartamentos = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/departamentos");
+        setDepartamentos(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError("Error fetching Departamentos");
+        setLoading(false);
+      }
+    };
+    fetchDepartamentos();
+  }, []);
+
+  const handleDeleteClick = (id: string) => {
+    setSelectedDepartament(id);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (selectedDepartament) {
+      try {
+        await axios.delete(
+          `http://localhost:3001/departamentos/${selectedDepartament}`
+        );
+        setDepartamentos(
+          departamentos.filter(
+            (departamento) =>
+              departamento.idDepartamento !== selectedDepartament
+          )
+        );
+        setIsModalOpen(false);
+      } catch (error) {
+        console.error("Error al eliminar el departamento", error);
+      }
+    }
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedDepartament(null);
+  };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
   return (
     <div className="app-container">
       <Side />
@@ -37,16 +88,21 @@ const Departamento = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {assignmentData.map((item, index) => (
-                    <tr key={index}>
-                      <td>{item.nombre}</td>
-                      <td>{item.descripcion}</td>
+                  {departamentos.map((departamento) => (
+                    <tr key={departamento.idDepartamento}>
+                      <td>{departamento.name}</td>
+                      <td>{departamento.description}</td>
                       <td>
                         <div className="action-buttons">
                           <button className="action-btn yellow">
                             <Pencil size={18} />
                           </button>
-                          <button className="action-btn red">
+                          <button
+                            className="action-btn red"
+                            onClick={() =>
+                              handleDeleteClick(departamento.idDepartamento)
+                            }
+                          >
                             <Trash2 size={18} />
                           </button>
                         </div>
@@ -76,7 +132,12 @@ const Departamento = () => {
           </div>
         </div>
       </div>
+      <DeleteConfirmationModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 };
-export default Departamento();
+export default Departamento;

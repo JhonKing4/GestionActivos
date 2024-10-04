@@ -1,7 +1,10 @@
 import { Download, Pencil, Trash2 } from "lucide-react";
 import Header from "../Extras/header";
 import Side from "../Extras/sidebar";
-import "../../styles/Tabla.css"
+import "../../styles/Tabla.css";
+import { useState } from "react";
+import AddMaterialModal from "./AddMaterialModal";
+import DeleteModal from "../Extras/DeleteModal";
 
 interface AssignmentItem {
   name: string;
@@ -19,7 +22,16 @@ interface AssignmentItem {
   departamentoId: string;
 }
 
-const Material = () => {
+const Material: React.FC = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const handleAddMaterial = (materialData: any) => {
+    console.log("Nuevo material:", materialData);
+    setIsModalOpen(false);
+  };
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const handleDelete = () => {
+    setIsDeleteModalOpen(false);
+  };
   const assignmentData: AssignmentItem[] = [
     {
       name: "Laptop Lenovo",
@@ -46,7 +58,12 @@ const Material = () => {
           <div className="table-section">
             <div className="section-header">
               <h2>Materiales</h2>
-              <button className="add-button">Agregar</button>
+              <button
+                className="add-button"
+                onClick={() => setIsModalOpen(true)}
+              >
+                Agregar
+              </button>
             </div>
             <div className="table-wrapper">
               <table>
@@ -92,7 +109,7 @@ const Material = () => {
                           <button className="action-btn yellow">
                             <Pencil size={18} />
                           </button>
-                          <button className="action-btn red">
+                          <button className="action-btn red" onClick={() => setIsDeleteModalOpen(true)}>
                             <Trash2 size={18} />
                           </button>
                         </div>
@@ -122,8 +139,18 @@ const Material = () => {
           </div>
         </div>
       </div>
+      <AddMaterialModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAdd={handleAddMaterial}
+      />
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 };
 
-export default Material();
+export default Material;

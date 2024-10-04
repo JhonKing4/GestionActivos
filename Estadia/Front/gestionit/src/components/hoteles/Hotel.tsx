@@ -2,17 +2,60 @@ import { Pencil, Trash2 } from "lucide-react";
 import Header from "../Extras/header";
 import Side from "../Extras/sidebar";
 import "../../styles/Tabla.css";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import DeleteConfirmationModal from "../Extras/DeleteModal";
 
 interface AssignmentItem {
-  nombre: string;
+  idHotel: string;
+  name: string;
 }
 
 const Hotel = () => {
-  const assignmentData: AssignmentItem[] = [
-    {
-      nombre: "Majestic",
-    },
-  ];
+  const [hotels, setHotels] = useState<AssignmentItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedHotel, setSelectedHotel] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchHotels = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/hoteles");
+        setHotels(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError("Error fetching hoteles");
+        setLoading(false);
+      }
+    };
+    fetchHotels();
+  }, []);
+
+  const handleDeleteClick = (id: string) => {
+    setSelectedHotel(id);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (selectedHotel) {
+      try {
+        await axios.delete(`http://localhost:3001/hoteles/${selectedHotel}`);
+        setHotels(hotels.filter((hotel) => hotel.idHotel !== selectedHotel));
+        setIsModalOpen(false);
+      } catch (error) {
+        console.error("Error al eliminar el Hotel", error);
+      }
+    }
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedHotel(null);
+  };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
   return (
     <div className="app-container">
       <Side />
@@ -33,15 +76,18 @@ const Hotel = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {assignmentData.map((item, index) => (
-                    <tr key={index}>
-                      <td>{item.nombre}</td>
+                  {hotels.map((hotel) => (
+                    <tr key={hotel.idHotel}>
+                      <td>{hotel.name}</td>
                       <td>
                         <div className="action-buttons">
                           <div className="action-btn yellow">
                             <Pencil size={18} />
                           </div>
-                          <div className="action-btn red">
+                          <div
+                            className="action-btn red"
+                            onClick={() => handleDeleteClick(hotel.idHotel)}
+                          >
                             <Trash2 size={18} />
                           </div>
                         </div>
@@ -71,8 +117,13 @@ const Hotel = () => {
           </div>
         </div>
       </div>
+      <DeleteConfirmationModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 };
 
-export default Hotel();
+export default Hotel;

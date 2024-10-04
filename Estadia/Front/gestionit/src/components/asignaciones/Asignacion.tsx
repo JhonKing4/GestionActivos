@@ -1,34 +1,95 @@
-
-import "../../styles/Sidebar.css";
-import "../../styles/Tabla.css";
-import { Download, Pencil, Trash2 } from "lucide-react";
-import Header from "../Extras/header";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import Side from "../Extras/sidebar";
+import Header from "../Extras/header";
+import { Download, Pencil, Trash2 } from "lucide-react";
+import "../../styles/Tabla.css";
+import DeleteConfirmationModal from "../Extras/DeleteModal";
 
-interface AssignmentItem {
-  material: string;
-  colaborador: string;
-  departamento: string;
-  fechaAsignacion: string;
-  fechaEntrega: string;
-  observacion: string;
-  estado: string;
-  nombreHotel: string;
+interface Material {
+  idMaterial: string;
+  name: string;
+  serial_number: string;
+}
+interface Hotel {
+  idHotel: string;
+  name: string;
+}
+interface Department {
+  idDepartamento: string;
+  name: string;
+  description: string;
+}
+interface User {
+  idUsuario: string;
+  name: string;
+  email: string;
+}
+interface AssgmentItem {
+  idAsignacion: string;
+  assignmentDate: string;
+  returnDate: string;
+  observation: string;
+  statusAsig: number;
+  usuario: User;
+  departamento: Department;
+  hotel: Hotel;
+  material: Material[];
 }
 
 const Asignacion = () => {
-  const assignmentData: AssignmentItem[] = [
-    {
-      material: "Gas Kitting",
-      colaborador: "G-7893",
-      departamento: "IE Project Items",
-      fechaAsignacion: "22 House Store",
-      fechaEntrega: "1 pcs",
-      observacion: "HQ",
-      estado: "HQ",
-      nombreHotel: "Hotel A",
-    },
-  ];
+  const [assignmentData, setAssigmentData] = useState<AssgmentItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedAssigment, setSelectedAssigment] = useState<string | null>(
+    null
+  );
+
+  useEffect(() => {
+    const fetchAssigment = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/asignacion");
+        setAssigmentData(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError("Error al obtener las asignaciones");
+        setLoading(false);
+      }
+    };
+    fetchAssigment();
+  }, []);
+
+  const handleDeleteClick = (id: string) => {
+    setSelectedAssigment(id);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (selectedAssigment) {
+      try {
+        await axios.delete(
+          `http://localhost:3001/asignacion/${selectedAssigment}`
+        );
+        setAssigmentData(
+          assignmentData.filter(
+            (assignment) => assignment.idAsignacion !== selectedAssigment
+          )
+        );
+        setIsModalOpen(false);
+      } catch (error) {
+        console.error("Error al eliminar la asignación", error);
+      }
+    }
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedAssigment(null);
+  };
+
+  if (loading) return <p>Cargando ...</p>;
+  if (error) return <p>{error}</p>;
 
   return (
     <div className="app-container">
@@ -45,7 +106,7 @@ const Asignacion = () => {
               <table>
                 <thead>
                   <tr>
-                    <th>Material</th>
+                    <th>Materiales</th>
                     <th>Colaborador</th>
                     <th>Departamento/Área</th>
                     <th>Fecha de Asignación</th>
@@ -53,20 +114,45 @@ const Asignacion = () => {
                     <th>Observación</th>
                     <th>Estado</th>
                     <th>Nombre de Hotel</th>
-                    <th>Action</th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {assignmentData.map((item, index) => (
-                    <tr key={index}>
-                      <td>{item.material}</td>
-                      <td>{item.colaborador}</td>
-                      <td>{item.departamento}</td>
-                      <td>{item.fechaAsignacion}</td>
-                      <td>{item.fechaEntrega}</td>
-                      <td>{item.observacion}</td>
-                      <td>{item.estado}</td>
-                      <td>{item.nombreHotel}</td>
+                  {assignmentData.map((item) => (
+                    <tr key={item.idAsignacion}>
+                      <td>
+                        {item.material &&
+                        Array.isArray(item.material) &&
+                        item.material.length > 0
+                          ? item.material
+                              .map((mat) =>
+                                mat && mat.name ? mat.name : "Sin nombre"
+                              )
+                              .join(", ")
+                          : "No Material"}
+                      </td>
+                      <td>{item.usuario.name}</td>
+                      <td>{item.departamento.name}</td>
+                      <td>{item.assignmentDate}</td>
+                      <td>{item.returnDate}</td>
+                      <td>{item.observation}</td>
+                      <td>
+                        {(() => {
+                          switch (item.statusAsig) {
+                            case 0:
+                              return "Activa";
+                            case 1:
+                              return "Completada";
+                            case 2:
+                              return "Pendiente";
+                            case 3:
+                              return "Cancelada";
+                            default:
+                              return "Desconocido";
+                          }
+                        })()}
+                      </td>
+                      <td>{item.hotel.name}</td>
                       <td>
                         <div className="action-buttons">
                           <button className="action-btn">
@@ -75,7 +161,10 @@ const Asignacion = () => {
                           <button className="action-btn yellow">
                             <Pencil size={18} />
                           </button>
-                          <button className="action-btn red">
+                          <button
+                            className="action-btn red"
+                            onClick={() => handleDeleteClick(item.idAsignacion)}
+                          >
                             <Trash2 size={18} />
                           </button>
                         </div>
@@ -87,7 +176,7 @@ const Asignacion = () => {
             </div>
             <div className="table-footer">
               <div className="showing-entries">
-                <span>Showing</span>
+                <span>Mostrando</span>
                 <select defaultValue="10">
                   <option value="10">10</option>
                   <option value="20">20</option>
@@ -105,16 +194,13 @@ const Asignacion = () => {
           </div>
         </div>
       </div>
+      <DeleteConfirmationModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 };
 
-export default Asignacion();
-
-/*
-  name: string;
-  phone: string;
-  address: string;
-  email: string;
-  rfc: string;
-*/
+export default Asignacion;
