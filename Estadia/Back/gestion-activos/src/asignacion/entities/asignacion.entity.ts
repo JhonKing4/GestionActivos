@@ -68,6 +68,7 @@ export class Asignacion {
   })
   @OneToMany(() => Material, (material) => material.asignacion, {
     nullable: false,
+    cascade: ['update', 'remove'],
   })
   material: Material[];
 

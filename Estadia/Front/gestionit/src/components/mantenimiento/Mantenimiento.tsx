@@ -5,6 +5,8 @@ import "../../styles/Tabla.css";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import DeleteConfirmationModal from "../Extras/DeleteModal";
+import AddMaintenance from "./AddMantenimiento";
+import EditMaintenance from "./EditMantenimiento";
 
 interface Material {
   idMaterial: string;
@@ -19,7 +21,7 @@ interface MaintenanceItem {
   startDate: string;
   endDate: string;
   typeMaintenance: number;
-  material: Material;
+  materials: Material[];
 }
 
 const Mantenimiento = () => {
@@ -30,18 +32,24 @@ const Mantenimiento = () => {
   const [selectedMaintenance, setSelectedMaintenance] = useState<string | null>(
     null
   );
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [editingMantenimientoId, setEditingMantenimientoId] = useState<
+    string | null
+  >(null);
+
+  const fetchMaintenance = async () => {
+    try {
+      const response = await axios.get("http://localhost:3001/mantenimiento");
+      setMaintenanceData(response.data);
+      setLoading(false);
+    } catch (err) {
+      setError("Error al obtener los mantenimientos");
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchMaintenance = async () => {
-      try {
-        const response = await axios.get("http://localhost:3001/mantenimiento");
-        setMaintenanceData(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError("Error al obtener los mantenimientos");
-        setLoading(false);
-      }
-    };
     fetchMaintenance();
   }, []);
 
@@ -73,6 +81,16 @@ const Mantenimiento = () => {
     setSelectedMaintenance(null);
   };
 
+  const handleEditClick = (idMantenimiento: string) => {
+    setEditingMantenimientoId(idMantenimiento);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditModalClose = () => {
+    setIsEditModalOpen(false);
+    setEditingMantenimientoId(null);
+  };
+
   if (loading) return <p>Cargando...</p>;
   if (error) return <p>{error}</p>;
 
@@ -85,7 +103,12 @@ const Mantenimiento = () => {
           <div className="table-section">
             <div className="section-header">
               <h2>Mantenimientos</h2>
-              <button className="add-button">Agregar</button>
+              <button
+                className="add-button"
+                onClick={() => setIsAddModalOpen(true)}
+              >
+                Agregar
+              </button>
             </div>
             <div className="table-wrapper">
               <table>
@@ -103,8 +126,18 @@ const Mantenimiento = () => {
                 <tbody>
                   {maintenanceData.map((item) => (
                     <tr key={item.idMantenimiento}>
-                      <td>{item.material.name}</td>
-                      <td>{item.material.serial_number}</td>
+                      <td>
+                        {item.materials.map((material) => (
+                          <p key={material.idMaterial}>{material.name}</p>
+                        ))}
+                      </td>
+                      <td>
+                        {item.materials.map((material) => (
+                          <p key={material.idMaterial}>
+                            {material.serial_number}
+                          </p>
+                        ))}
+                      </td>
                       <td>{item.description}</td>
                       <td>
                         {item.typeMaintenance === 0
@@ -115,7 +148,12 @@ const Mantenimiento = () => {
                       <td>{item.endDate}</td>
                       <td>
                         <div className="action-buttons">
-                          <button className="action-btn yellow">
+                          <button
+                            className="action-btn yellow"
+                            onClick={() =>
+                              handleEditClick(item.idMantenimiento)
+                            }
+                          >
                             <Pencil size={18} />
                           </button>
                           <button
@@ -158,6 +196,19 @@ const Mantenimiento = () => {
         onClose={handleModalClose}
         onConfirm={handleDeleteConfirm}
       />
+      <AddMaintenance
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onMaintenanceAdded={fetchMaintenance}
+      />
+      {editingMantenimientoId !== null && (
+        <EditMaintenance
+          isOpen={isEditModalOpen}
+          onClose={handleEditModalClose}
+          idMantenimiento={editingMantenimientoId}
+          onMaintenanceUpdated={fetchMaintenance}
+        />
+      )}
     </div>
   );
 };

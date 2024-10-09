@@ -5,6 +5,8 @@ import "../../styles/Tabla.css";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import DeleteConfirmationModal from "../Extras/DeleteModal";
+import AddProveedor from "./AddProveedor";
+import EditProveedor from "./EditProveedor";
 
 interface AssignmentItem {
   idProveedor: string;
@@ -23,24 +25,32 @@ const Proveedor = () => {
   const [selectedProveedors, setSelectedProveedors] = useState<string | null>(
     null
   );
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [editingProveedorId, setEditingProveedorId] = useState<string | null>(
+    null
+  );
+
+  const fecthProveedors = async () => {
+    try {
+      const response = await axios.get("http://localhost:3001/proveedores");
+      setProveedors(response.data);
+      setLoading(false);
+    } catch (err) {
+      setError("Error fetching Proveedores");
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fecthProveedors = async () => {
-      try {
-        const response = await axios.get("http://localhost:3001/proveedores");
-        setProveedors(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError("Error fetching Proveedores");
-        setLoading(false);
-      }
-    };
     fecthProveedors();
   }, []);
+
   const handleDeleteClick = (id: string) => {
     setSelectedProveedors(id);
     setIsModalOpen(true);
   };
+
   const handleDeleteConfirm = async () => {
     if (selectedProveedors) {
       try {
@@ -63,8 +73,20 @@ const Proveedor = () => {
     setIsModalOpen(false);
     setSelectedProveedors(null);
   };
+
+  const handleEditClick = (idProveedor: string) => {
+    setEditingProveedorId(idProveedor);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditModalClose = () => {
+    setIsAddModalOpen(false);
+    setEditingProveedorId(null);
+  };
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
+
   return (
     <div className="app-container">
       <Side />
@@ -74,7 +96,12 @@ const Proveedor = () => {
           <div className="table-section">
             <div className="section-header">
               <h2>Proveedores</h2>
-              <button className="add-button">Agregar</button>
+              <button
+                className="add-button"
+                onClick={() => setIsAddModalOpen(true)}
+              >
+                Agregar
+              </button>
             </div>
             <div className="table-wrapper">
               <table>
@@ -98,7 +125,12 @@ const Proveedor = () => {
                       <td>{proveedor.rfc}</td>
                       <td>
                         <div className="action-buttons">
-                          <button className="action-btn yellow">
+                          <button
+                            className="action-btn yellow"
+                            onClick={() =>
+                              handleEditClick(proveedor.idProveedor)
+                            }
+                          >
                             <Pencil size={18} />
                           </button>
                           <button
@@ -141,6 +173,19 @@ const Proveedor = () => {
         onClose={handleModalClose}
         onConfirm={handleDeleteConfirm}
       />
+      <AddProveedor
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onProveedorAdded={fecthProveedors}
+      />
+      {editingProveedorId !== null && (
+        <EditProveedor
+          isOpen={isEditModalOpen}
+          onClose={handleEditModalClose}
+          idProveedor={editingProveedorId}
+          onProveedorUpdated={fecthProveedors}
+        />
+      )}
     </div>
   );
 };

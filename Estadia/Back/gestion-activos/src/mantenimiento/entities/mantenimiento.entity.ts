@@ -1,12 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Material } from 'src/material/entities/material.entity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { TypeMaintenance } from '../enum/type_maintenance.enum';
 
 @Entity({ name: 'mantenimientos' })
@@ -48,17 +42,15 @@ export class Mantenimiento {
   endDate: Date;
 
   @ApiProperty({
-    type: Material,
-    example: 'b7ba0f09-5a6e-4146-93c2-0c9b934162fe',
-    description: 'El ID que para la relacion de las tablas',
+    type: [Material],
+    description: 'Lista de materiales asociados al mantenimiento',
     nullable: false,
   })
-  @ManyToOne(() => Material, (material) => material.name, {
-    eager: true,
+  @OneToMany(() => Material, (material) => material.mantenimiento, {
+    cascade: ['update', 'remove'],
     nullable: false,
   })
-  @JoinColumn({ name: 'idMaterial' })
-  material: Material;
+  materials: Material[];
 
   @ApiProperty({
     example: 0,

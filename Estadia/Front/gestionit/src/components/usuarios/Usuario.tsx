@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import axios from "axios"; // Si usas axios
+import axios from "axios";
 import { Pencil, Trash2 } from "lucide-react";
 import Header from "../Extras/header";
 import Side from "../Extras/sidebar";
 import "../../styles/Tabla.css";
 import DeleteConfirmationModal from "../Extras/DeleteModal";
+import AddUser from "./AddUser";
+import EditUser from "./EditUser";
 
 interface AssignmentItem {
   idUsuario: string;
@@ -20,21 +22,25 @@ const Usuario = () => {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get("http://localhost:3001/usuario");
+      setUsers(response.data);
+      setLoading(false);
+    } catch (err) {
+      setError("Error fetching users");
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get("http://localhost:3001/usuario");
-        setUsers(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError("Error fetching users");
-        setLoading(false);
-      }
-    };
     fetchUsers();
   }, []);
-  
+
   const handleDeleteClick = (id: string) => {
     setSelectedUser(id);
     setIsModalOpen(true);
@@ -57,6 +63,16 @@ const Usuario = () => {
     setSelectedUser(null);
   };
 
+  const handleEditClick = (idUsuario: string) => {
+    setEditingUserId(idUsuario);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditModalClose = () => {
+    setIsEditModalOpen(false);
+    setEditingUserId(null);
+  };
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
@@ -69,7 +85,12 @@ const Usuario = () => {
           <div className="table-section">
             <div className="section-header">
               <h2>Usuarios</h2>
-              <button className="add-button">Agregar</button>
+              <button
+                className="add-button"
+                onClick={() => setIsAddModalOpen(true)}
+              >
+                Agregar
+              </button>
             </div>
             <div className="table-wrapper">
               <table>
@@ -91,7 +112,10 @@ const Usuario = () => {
                       <td>{user.roles === 0 ? "Admin" : "Colaborador"}</td>
                       <td>
                         <div className="action-buttons">
-                          <button className="action-btn yellow">
+                          <button
+                            className="action-btn yellow"
+                            onClick={() => handleEditClick(user.idUsuario)}
+                          >
                             <Pencil size={18} />
                           </button>
                           <button
@@ -132,6 +156,19 @@ const Usuario = () => {
         onClose={handleModalClose}
         onConfirm={handleDeleteConfirm}
       />
+      <AddUser
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onUserAdded={fetchUsers}
+      />
+      {editingUserId !== null && (
+        <EditUser
+          isOpen={isEditModalOpen}
+          onClose={handleEditModalClose}
+          userId={editingUserId}
+          onUserUpdated={fetchUsers}
+        />
+      )}
     </div>
   );
 };

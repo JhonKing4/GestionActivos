@@ -7,6 +7,7 @@ import { Hotel } from 'src/hotel/entities/hotel.entity';
 import { Proveedor } from 'src/proveedor/entities/proveedor.entity';
 import { Departamento } from 'src/departamento/entities/departamento.entity';
 import { Asignacion } from 'src/asignacion/entities/asignacion.entity';
+import { Mantenimiento } from 'src/mantenimiento/entities/mantenimiento.entity';
 
 @Entity({ name: 'materiales' })
 export class Material {
@@ -151,6 +152,14 @@ export class Material {
   })
   departamento: Departamento;
 
-  @ManyToOne(() => Asignacion, (asignacion) => asignacion.material)
+  @ManyToOne(() => Asignacion, (asignacion) => asignacion.material, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
   asignacion: Asignacion;
+  @ManyToOne(() => Mantenimiento, (mantenimiento) => mantenimiento.materials, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  mantenimiento: Mantenimiento;
 }

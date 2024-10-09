@@ -55,8 +55,10 @@ export class CreateMantenimientoDto {
   @ApiProperty({
     description: 'b7ba0f09-5a6e-4146-93c2-0c9b934162fe',
     nullable: false,
+    type: [String],
+    isArray: true,
   })
-  @IsUUID()
+  @IsUUID('all', { each: true })
   @IsNotEmpty()
-  material: string;
+  materials: string[];
 }

@@ -147,7 +147,20 @@ export class AsignacionService {
   }
 
   async remove(id: string): Promise<void> {
-    const asignacion = await this.findOne(id);
+    const asignacion = await this.asignacionRepository.findOne({
+      where: { idAsignacion: id },
+      relations: ['material'],
+    });
+
+    if (!asignacion) {
+      throw new NotFoundException(`Asignación con ID ${id} no encontrada`);
+    }
+
+    asignacion.material.forEach(async (material) => {
+      material.asignacion = null;
+      await this.materialRepository.save(material);
+    });
+
     await this.asignacionRepository.remove(asignacion);
   }
 }

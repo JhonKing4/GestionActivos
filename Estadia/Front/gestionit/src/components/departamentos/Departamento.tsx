@@ -6,6 +6,8 @@ import "../../styles/Tabla.css";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import DeleteConfirmationModal from "../Extras/DeleteModal";
+import AddDepartamento from "./AddDepartamento";
+import EditDepartamento from "./EditDepartamento";
 
 interface AssignmentItem {
   idDepartamento: string;
@@ -21,18 +23,23 @@ const Departamento = () => {
   const [selectedDepartament, setSelectedDepartament] = useState<string | null>(
     null
   );
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [editingDepartamentoId, setEditingDepartamentoId] = useState<
+    string | null
+  >(null);
 
+  const fetchDepartamentos = async () => {
+    try {
+      const response = await axios.get("http://localhost:3001/departamentos");
+      setDepartamentos(response.data);
+      setLoading(false);
+    } catch (err) {
+      setError("Error fetching Departamentos");
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchDepartamentos = async () => {
-      try {
-        const response = await axios.get("http://localhost:3001/departamentos");
-        setDepartamentos(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError("Error fetching Departamentos");
-        setLoading(false);
-      }
-    };
     fetchDepartamentos();
   }, []);
 
@@ -65,6 +72,16 @@ const Departamento = () => {
     setSelectedDepartament(null);
   };
 
+  const handleEditClick = (idDepartamento: string) => {
+    setEditingDepartamentoId(idDepartamento);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditModalClose = () => {
+    setIsEditModalOpen(false);
+    setEditingDepartamentoId(null);
+  };
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
   return (
@@ -76,7 +93,12 @@ const Departamento = () => {
           <div className="table-section">
             <div className="section-header">
               <h2>Departamentos</h2>
-              <button className="add-button">Agregar</button>
+              <button
+                className="add-button"
+                onClick={() => setIsAddModalOpen(true)}
+              >
+                Agregar
+              </button>
             </div>
             <div className="table-wrapper">
               <table>
@@ -94,7 +116,12 @@ const Departamento = () => {
                       <td>{departamento.description}</td>
                       <td>
                         <div className="action-buttons">
-                          <button className="action-btn yellow">
+                          <button
+                            className="action-btn yellow"
+                            onClick={() =>
+                              handleEditClick(departamento.idDepartamento)
+                            }
+                          >
                             <Pencil size={18} />
                           </button>
                           <button
@@ -137,6 +164,19 @@ const Departamento = () => {
         onClose={handleModalClose}
         onConfirm={handleDeleteConfirm}
       />
+      <AddDepartamento
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onDepartamentoAdded={fetchDepartamentos}
+      />
+      {editingDepartamentoId !== null && (
+        <EditDepartamento
+          isOpen={isEditModalOpen}
+          onClose={handleEditModalClose}
+          idDepartamento={editingDepartamentoId}
+          onDepartamentoUpdated={fetchDepartamentos}
+        />
+      )}
     </div>
   );
 };

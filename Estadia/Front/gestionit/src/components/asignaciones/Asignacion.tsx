@@ -121,15 +121,9 @@ const Asignacion = () => {
                   {assignmentData.map((item) => (
                     <tr key={item.idAsignacion}>
                       <td>
-                        {item.material &&
-                        Array.isArray(item.material) &&
-                        item.material.length > 0
-                          ? item.material
-                              .map((mat) =>
-                                mat && mat.name ? mat.name : "Sin nombre"
-                              )
-                              .join(", ")
-                          : "No Material"}
+                        {item.material.map((material) => (
+                          <p key={material.idMaterial}>{material.name}</p>
+                        ))}
                       </td>
                       <td>{item.usuario.name}</td>
                       <td>{item.departamento.name}</td>
