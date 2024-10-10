@@ -29,29 +29,23 @@ const EditMaintenance = ({
   });
 
   const [availableMaterials, setAvailableMaterials] = useState<any[]>([]);
-  const [allMaterials, setAllMaterials] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchMaintenanceData = async () => {
     try {
-      const maintenanceResponse = await axios.get(
-        `http://localhost:3001/mantenimiento/${idMantenimiento}`
-      );
-      const maintenanceData = maintenanceResponse.data;
-      console.log("Datos del mantenimiento:", maintenanceData);
+      const [maintenanceResponse, materialResponse, maintenancesResponse] =
+        await Promise.all([
+          axios.get(`http://localhost:3001/mantenimiento/${idMantenimiento}`),
+          axios.get("http://localhost:3001/material"),
+          axios.get("http://localhost:3001/mantenimiento"),
+        ]);
 
-      const materialResponse = await axios.get(
-        "http://localhost:3001/material"
-      );
-      const allMaterials = materialResponse.data;
-      console.log("Todos los materiales:", allMaterials);
+      const maintenanceData = maintenanceResponse.data?.data || {};
+      const allMaterials = materialResponse.data || [];
+      const allMaintenances = maintenancesResponse.data || [];
 
-      const maintenancesResponse = await axios.get(
-        "http://localhost:3001/mantenimiento"
-      );
-      const usedMaterials = maintenancesResponse.data.flatMap(
-        (mantenimiento: any) =>
-          mantenimiento.materials.map((m: any) => m.idMaterial)
+      const usedMaterials = allMaintenances.flatMap((mantenimiento: any) =>
+        mantenimiento.materials.map((m: any) => m.idMaterial)
       );
 
       console.log(
@@ -59,24 +53,35 @@ const EditMaintenance = ({
         usedMaterials
       );
 
-      const filteredMaterials = allMaterials.filter(
-        (material: any) =>
-          !usedMaterials.includes(material.idMaterial) ||
-          maintenanceData.materials.includes(material.idMaterial)
+      const availableMaterials = allMaterials.filter(
+        (material: any) => !usedMaterials.includes(material.idMaterial)
       );
 
-      console.log("Materiales filtrados:", filteredMaterials);
+      const materialsInMaintenance = maintenanceData.materials.map(
+        (m: any) => m.idMaterial
+      );
+      const filteredMaterials = [
+        ...availableMaterials,
+        ...allMaterials.filter((material: any) =>
+          materialsInMaintenance.includes(material.idMaterial)
+        ),
+      ];
+
+      console.log(
+        "Materiales filtrados (disponibles + asignados):",
+        filteredMaterials
+      );
 
       setFormData({
         description: maintenanceData.description,
         startDate: maintenanceData.startDate,
         endDate: maintenanceData.endDate,
         typeMaintenance: maintenanceData.typeMaintenance,
-        materials: maintenanceData.materials.map((m: any) => m.idMaterial),
+        materials: materialsInMaintenance,
       });
 
-      setAllMaterials(allMaterials);
       setAvailableMaterials(filteredMaterials);
+      allMaterials(allMaterials);
       setLoading(false);
     } catch (error) {
       console.error("Error al obtener los datos del mantenimiento:", error);
@@ -111,6 +116,7 @@ const EditMaintenance = ({
     });
   };
 
+  // Enviar los cambios de mantenimiento
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {

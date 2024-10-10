@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { RelacionElement } from './entities/relacion-element.entity';
 import { CreateRelacionElementDto } from './dto/create-relacion-element.dto';
 import { Material } from '../material/entities/material.entity';
+import { RelacionElementResponseDto } from './dto/response-relacion-element.dto';
 
 @Injectable()
 export class RelacionElementsService {
@@ -52,29 +53,47 @@ export class RelacionElementsService {
     };
   }
 
-  async findAll(): Promise<RelacionElement[]> {
+  async findAll(): Promise<RelacionElementResponseDto[]> {
     const relaciones = await this.relacionElementRepository.find();
 
     return Promise.all(
       relaciones.map(async (relacion) => {
         const materialPadre = await this.materialRepository.findOne({
-          where: { idMaterial: relacion.materialPadre as any },
+          where: { idMaterial: relacion.materialPadre.idMaterial },
         });
+
+        if (!materialPadre) {
+          throw new NotFoundException(
+            `Material padre no encontrado para relación: ${relacion.idRelacionElement}`,
+          );
+        }
 
         const materialesHijos = await this.materialRepository.findByIds(
           relacion.materialHijos,
         );
 
+        if (!materialesHijos) {
+          throw new NotFoundException(
+            `Materiales hijos no encontrados para relación: ${relacion.idRelacionElement}`,
+          );
+        }
+
+        const materialesHijosFiltrados = materialesHijos.filter(
+          (hijo) => hijo.idMaterial !== materialPadre.idMaterial,
+        );
+
         return {
-          ...relacion,
+          idRelacionElement: relacion.idRelacionElement,
+          amount: relacion.amount,
           materialPadre,
-          materialesHijos,
+          materialesHijos: materialesHijosFiltrados,
         };
       }),
     );
   }
 
-  async findOne(id: string): Promise<any> {
+  async findOne(id: string): Promise<RelacionElementResponseDto> {
+    // Recuperamos la relación por su ID
     const relacion = await this.relacionElementRepository.findOne({
       where: { idRelacionElement: id },
     });
@@ -83,23 +102,30 @@ export class RelacionElementsService {
       throw new NotFoundException('Relación no encontrada');
     }
 
+    // Asegúrate de usar el ID para buscar el material padre
     const materialPadre = await this.materialRepository.findOne({
-      where: { idMaterial: relacion.materialPadre as any },
+      where: { idMaterial: relacion.materialPadre.idMaterial }, // Usa el idMaterial aquí
     });
 
     if (!materialPadre) {
       throw new NotFoundException('Material padre no encontrado');
     }
 
+    // Obtenemos los materiales hijos con sus IDs
     const materialesHijos = await this.materialRepository.findByIds(
-      relacion.materialHijos,
+      relacion.materialHijos, // Esto debe ser un array de IDs
+    );
+
+    // Filtramos los materiales hijos para evitar que el padre se incluya accidentalmente
+    const materialesHijosFiltrados = materialesHijos.filter(
+      (hijo) => hijo.idMaterial !== materialPadre.idMaterial,
     );
 
     return {
       idRelacionElement: relacion.idRelacionElement,
       amount: relacion.amount,
       materialPadre,
-      materialesHijos,
+      materialesHijos: materialesHijosFiltrados,
     };
   }
 

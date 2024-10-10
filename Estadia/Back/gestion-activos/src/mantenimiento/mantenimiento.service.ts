@@ -55,7 +55,6 @@ export class MantenimientoService {
         );
       }
 
-      // Crear el nuevo mantenimiento si los materiales no están asignados
       const nuevoMantenimiento = this.mantenimientoRepository.create({
         ...createMantenimientoDto,
         materials: materiales,

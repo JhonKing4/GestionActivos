@@ -5,6 +5,8 @@ import Header from "../Extras/header";
 import { Download, Pencil, Trash2 } from "lucide-react";
 import "../../styles/Tabla.css";
 import DeleteConfirmationModal from "../Extras/DeleteModal";
+import AddAssignment from "./AddAsignacion";
+import EditAssignment from "./EditAsignacion";
 
 interface Material {
   idMaterial: string;
@@ -45,18 +47,24 @@ const Asignacion = () => {
   const [selectedAssigment, setSelectedAssigment] = useState<string | null>(
     null
   );
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [editingAsignacionId, setEditingAsignacionId] = useState<string | null>(
+    null
+  );
+
+  const fetchAssigment = async () => {
+    try {
+      const response = await axios.get("http://localhost:3001/asignacion");
+      setAssigmentData(response.data);
+      setLoading(false);
+    } catch (err) {
+      setError("Error al obtener las asignaciones");
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchAssigment = async () => {
-      try {
-        const response = await axios.get("http://localhost:3001/asignacion");
-        setAssigmentData(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError("Error al obtener las asignaciones");
-        setLoading(false);
-      }
-    };
     fetchAssigment();
   }, []);
 
@@ -88,6 +96,16 @@ const Asignacion = () => {
     setSelectedAssigment(null);
   };
 
+  const handleEditClick = (idAsignacion: string) => {
+    setEditingAsignacionId(idAsignacion);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditModalClose = () => {
+    setIsEditModalOpen(false);
+    setEditingAsignacionId(null);
+  };
+
   if (loading) return <p>Cargando ...</p>;
   if (error) return <p>{error}</p>;
 
@@ -100,7 +118,12 @@ const Asignacion = () => {
           <div className="table-section">
             <div className="section-header">
               <h2>Asignación</h2>
-              <button className="add-button">Agregar</button>
+              <button
+                className="add-button"
+                onClick={() => setIsAddModalOpen(true)}
+              >
+                Agregar
+              </button>
             </div>
             <div className="table-wrapper">
               <table>
@@ -152,7 +175,10 @@ const Asignacion = () => {
                           <button className="action-btn">
                             <Download size={18} />
                           </button>
-                          <button className="action-btn yellow">
+                          <button
+                            className="action-btn yellow"
+                            onClick={() => handleEditClick(item.idAsignacion)}
+                          >
                             <Pencil size={18} />
                           </button>
                           <button
@@ -193,6 +219,19 @@ const Asignacion = () => {
         onClose={handleModalClose}
         onConfirm={handleDeleteConfirm}
       />
+      <AddAssignment
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAssignmentAdded={fetchAssigment}
+      />
+      {editingAsignacionId !== null && (
+        <EditAssignment
+          isOpen={isEditModalOpen}
+          onClose={handleEditModalClose}
+          assignmentId={editingAsignacionId}
+          onAssignmentUpdated={fetchAssigment}
+        />
+      )}
     </div>
   );
 };

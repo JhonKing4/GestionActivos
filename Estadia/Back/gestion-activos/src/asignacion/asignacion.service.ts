@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateAsignacionDto } from './dto/create-asignacion.dto';
 import { UpdateAsignacionDto } from './dto/update-asignacion.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -28,8 +32,8 @@ export class AsignacionService {
     const { materialId, usuarioId, departamentoId, hotelId, ...restoDatos } =
       createAsignacionDto;
 
-    const material = await this.materialRepository.findByIds(materialId);
-    if (material.length === 0) {
+    const materiales = await this.materialRepository.findByIds(materialId);
+    if (materiales.length === 0) {
       throw new NotFoundException('No se encontraron materiales válidos.');
     }
 
@@ -54,12 +58,30 @@ export class AsignacionService {
       throw new NotFoundException(`Hotel con ID ${hotelId} no encontrado`);
     }
 
+    const materialIds = materiales.map((material) => material.idMaterial);
+
+    const asignacionesExistentes = await this.asignacionRepository
+      .createQueryBuilder('asignacion')
+      .leftJoinAndSelect('asignacion.material', 'material')
+      .where('material.idMaterial IN (:...materialIds)', { materialIds })
+      .getMany();
+
+    if (asignacionesExistentes.length > 0) {
+      const materialesYaAsignados = asignacionesExistentes
+        .map((asignacion) => asignacion.material.map((m) => m.idMaterial))
+        .flat();
+
+      throw new ConflictException(
+        `El material con ID ${materialesYaAsignados.join(', ')} ya está asignado. No se puede volver a asignar.`,
+      );
+    }
+
     const nuevaAsignacion = this.asignacionRepository.create({
       ...restoDatos,
       usuario,
       departamento,
       hotel,
-      material,
+      material: materiales,
     });
 
     return await this.asignacionRepository.save(nuevaAsignacion);
