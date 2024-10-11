@@ -45,8 +45,8 @@ interface MaterialItem {
 }
 
 interface MaterialRelation {
-  fk_material_padre: string;
-  fk_material_hijos: string[];
+  materialPadre: MaterialItem;
+  materialesHijos: MaterialItem[];
   amount: number;
 }
 
@@ -70,20 +70,16 @@ const Material: React.FC = () => {
         const materialsData = await materialsResponse.json();
         const relationsData = await relationsResponse.json();
 
-        // Asegurarse de que materials siempre sea un array
         const processedMaterials = Array.isArray(materialsData)
           ? materialsData
           : [materialsData].filter(Boolean);
         setMaterials(processedMaterials);
 
-        // Asegurarse de que relations siempre sea un array
         const processedRelations = Array.isArray(relationsData)
           ? relationsData
           : [relationsData].filter(Boolean);
         setRelations(processedRelations);
 
-        console.log("Materials:", processedMaterials);
-        console.log("Relations:", processedRelations);
       } catch (error) {
         console.error("Error fetching data:", error);
         setMaterials([]);
@@ -95,57 +91,63 @@ const Material: React.FC = () => {
   }, []);
 
   const processMaterialsWithHierarchy = () => {
-    if (!materials.length) return;
+    if (!materials.length || !relations.length) return;
 
     const processed: MaterialItem[] = [];
     let parentCounter = 1;
 
-    // Crear un mapa de hijos para búsqueda rápida
     const childrenMap = new Map<string, string>();
     relations.forEach((relation) => {
-      if (relation.fk_material_hijos) {
-        relation.fk_material_hijos.forEach((childId) => {
-          childrenMap.set(childId, relation.fk_material_padre);
+      if (relation.materialesHijos) {
+        relation.materialesHijos.forEach((childMaterial) => {
+          childrenMap.set(
+            childMaterial.idMaterial,
+            relation.materialPadre.idMaterial
+          );
         });
       }
     });
-    // Procesar primero los materiales padre
+
+
+    const processChildren = (parentId: string, parentHierarchy: string) => {
+      const relationAsParent = relations.find(
+        (rel) => rel.materialPadre.idMaterial === parentId
+      );
+
+      if (relationAsParent && relationAsParent.materialesHijos) {
+        let childCounter = 1;
+        relationAsParent.materialesHijos.forEach((childMaterial) => {
+          const material = materials.find(
+            (m) => m.idMaterial === childMaterial.idMaterial
+          );
+          if (material) {
+            const childHierarchy = `${parentHierarchy}.${childCounter}`;
+            processed.push({
+              ...material,
+              hierarchyNumber: childHierarchy,
+            });
+            childCounter++;
+
+            processChildren(material.idMaterial, childHierarchy);
+          }
+        });
+      }
+    };
+
     materials.forEach((material) => {
-      // Verificar si este material es un hijo
       const parentId = childrenMap.get(material.idMaterial);
 
       if (!parentId) {
-        // Este es un material padre o sin relación
-        const relationAsParent = relations.find(
-          (rel) => rel.fk_material_padre === material.idMaterial
-        );
-
         processed.push({
           ...material,
           hierarchyNumber: `${parentCounter}`,
         });
 
-        // Procesar los hijos inmediatamente después del padre
-        if (relationAsParent && relationAsParent.fk_material_hijos) {
-          let childCounter = 1;
-          relationAsParent.fk_material_hijos.forEach((childId) => {
-            const childMaterial = materials.find(
-              (m) => m.idMaterial === childId
-            );
-            if (childMaterial) {
-              processed.push({
-                ...childMaterial,
-                hierarchyNumber: `${parentCounter}.${childCounter}`,
-              });
-              childCounter++;
-            }
-          });
-        }
+        processChildren(material.idMaterial, `${parentCounter}`);
         parentCounter++;
       }
     });
 
-    console.log("Processed Materials:", processed);
     setProcessedMaterials(processed);
   };
 
@@ -154,7 +156,6 @@ const Material: React.FC = () => {
   }, [materials, relations]);
 
   const handleAddMaterial = (materialData: any) => {
-    console.log("Nuevo material:", materialData);
     setIsModalOpen(false);
   };
 
