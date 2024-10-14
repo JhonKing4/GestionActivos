@@ -32,10 +32,10 @@ export class Material {
   @ApiProperty({
     example: 'IdeaPad L340',
     description: 'El modelo o versión del material',
-    uniqueItems: true,
+    uniqueItems: false,
     nullable: false,
   })
-  @Column({ type: 'varchar', length: 100, unique: true, nullable: false })
+  @Column({ type: 'varchar', length: 100, unique: false, nullable: false })
   model: string;
 
   @ApiProperty({

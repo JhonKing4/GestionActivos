@@ -1,10 +1,10 @@
+import React, { useState, useEffect } from "react";
 import { Download, Pencil, Trash2 } from "lucide-react";
 import Header from "../Extras/header";
 import Side from "../Extras/sidebar";
-
-import { useState, useEffect } from "react";
 import AddMaterialModal from "./AddMaterialModal";
 import DeleteModal from "../Extras/DeleteModal";
+import EditMaterialModal from "./EditMaterial";
 
 interface Hotel {
   idHotel: string;
@@ -42,6 +42,7 @@ interface MaterialItem {
   proveedor: Proveedor;
   departamento: Departamento;
   hierarchyNumber?: string;
+  depth?: number;
 }
 
 interface MaterialRelation {
@@ -58,6 +59,24 @@ const Material: React.FC = () => {
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedMaterial, setSelectedMaterial] = useState<MaterialItem | null>(
+    null
+  );
+  const [selectedSubMaterials, setSelectedSubMaterials] = useState<
+    MaterialItem[]
+  >([]);
+
+  const handleEditMaterial = (material: MaterialItem) => {
+    const relatedRelation = relations.find(
+      (rel) => rel.materialPadre.idMaterial === material.idMaterial
+    );
+    setSelectedMaterial(material);
+    setSelectedSubMaterials(
+      relatedRelation ? relatedRelation.materialesHijos : []
+    );
+    setIsEditModalOpen(true);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -79,7 +98,6 @@ const Material: React.FC = () => {
           ? relationsData
           : [relationsData].filter(Boolean);
         setRelations(processedRelations);
-
       } catch (error) {
         console.error("Error fetching data:", error);
         setMaterials([]);
@@ -94,9 +112,8 @@ const Material: React.FC = () => {
     if (!materials.length || !relations.length) return;
 
     const processed: MaterialItem[] = [];
-    let parentCounter = 1;
-
     const childrenMap = new Map<string, string>();
+
     relations.forEach((relation) => {
       if (relation.materialesHijos) {
         relation.materialesHijos.forEach((childMaterial) => {
@@ -108,43 +125,44 @@ const Material: React.FC = () => {
       }
     });
 
-
-    const processChildren = (parentId: string, parentHierarchy: string) => {
+    const processChildren = (
+      parentId: string,
+      parentHierarchy: string,
+      depth: number = 0
+    ) => {
       const relationAsParent = relations.find(
         (rel) => rel.materialPadre.idMaterial === parentId
       );
 
       if (relationAsParent && relationAsParent.materialesHijos) {
-        let childCounter = 1;
-        relationAsParent.materialesHijos.forEach((childMaterial) => {
+        relationAsParent.materialesHijos.forEach((childMaterial, index) => {
           const material = materials.find(
             (m) => m.idMaterial === childMaterial.idMaterial
           );
           if (material) {
-            const childHierarchy = `${parentHierarchy}.${childCounter}`;
+            const childHierarchy = `${parentHierarchy}.${index + 1}`;
             processed.push({
               ...material,
               hierarchyNumber: childHierarchy,
+              depth: depth + 1,
             });
-            childCounter++;
 
-            processChildren(material.idMaterial, childHierarchy);
+            processChildren(material.idMaterial, childHierarchy, depth + 1);
           }
         });
       }
     };
 
-    materials.forEach((material) => {
-      const parentId = childrenMap.get(material.idMaterial);
-
-      if (!parentId) {
+    materials.forEach((material, index) => {
+      if (!childrenMap.has(material.idMaterial)) {
+        const hierarchyNumber = `${index + 1}`;
         processed.push({
           ...material,
-          hierarchyNumber: `${parentCounter}`,
+          hierarchyNumber: hierarchyNumber,
+          depth: 0,
         });
 
-        processChildren(material.idMaterial, `${parentCounter}`);
-        parentCounter++;
+        processChildren(material.idMaterial, hierarchyNumber);
       }
     });
 
@@ -204,7 +222,7 @@ const Material: React.FC = () => {
                     <tr
                       key={index}
                       className={
-                        item.hierarchyNumber?.includes(".")
+                        item.depth && item.depth > 0
                           ? "child-row"
                           : "parent-row"
                       }
@@ -212,10 +230,9 @@ const Material: React.FC = () => {
                       <td>{item.hierarchyNumber}</td>
                       <td
                         className={
-                          item.hierarchyNumber?.includes(".")
-                            ? "indented-cell"
-                            : ""
+                          item.depth && item.depth > 0 ? "indented-cell" : ""
                         }
+                        style={{ paddingLeft: `${(item.depth || 0) * 20}px` }}
                       >
                         {item.name}
                       </td>
@@ -235,7 +252,10 @@ const Material: React.FC = () => {
                           <button className="action-btn">
                             <Download size={18} />
                           </button>
-                          <button className="action-btn yellow">
+                          <button
+                            className="action-btn yellow"
+                            onClick={() => handleEditMaterial(item)}
+                          >
                             <Pencil size={18} />
                           </button>
                           <button
@@ -280,6 +300,19 @@ const Material: React.FC = () => {
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDelete}
+      />
+      <EditMaterialModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        material={selectedMaterial || {}}
+        onUpdate={(updatedMaterial) => {
+          setMaterials((prev) =>
+            prev.map((m) =>
+              m.idMaterial === updatedMaterial.idMaterial ? updatedMaterial : m
+            )
+          );
+          setIsEditModalOpen(false);
+        }}
       />
     </div>
   );

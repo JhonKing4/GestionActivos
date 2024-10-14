@@ -47,22 +47,34 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
   const [proveedores, setProveedores] = useState<any[]>([]);
   const [departamentos, setDepartamentos] = useState<any[]>([]);
   const [hoteles, setHoteles] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchProveedores = async () => {
-      const response = await axios.get("http://localhost:3001/proveedores");
-      setProveedores(response.data);
+      try {
+        const response = await axios.get("http://localhost:3001/proveedores");
+        setProveedores(response.data);
+      } catch (error) {
+        console.error("Error al obtener proveedores:", error);
+      }
     };
 
     const fetchDepartamentos = async () => {
-      const response = await axios.get("http://localhost:3001/departamentos");
-      setDepartamentos(response.data);
+      try {
+        const response = await axios.get("http://localhost:3001/departamentos");
+        setDepartamentos(response.data);
+      } catch (error) {
+        console.error("Error al obtener departamentos:", error);
+      }
     };
 
     const fetchHoteles = async () => {
-      const response = await axios.get("http://localhost:3001/hoteles");
-      console.log("Datos de hoteles:", response.data);
-      setHoteles(response.data);
+      try {
+        const response = await axios.get("http://localhost:3001/hoteles");
+        setHoteles(response.data);
+      } catch (error) {
+        console.error("Error al obtener hoteles:", error);
+      }
     };
 
     fetchProveedores();
@@ -70,24 +82,50 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
     fetchHoteles();
   }, []);
 
+  const resetForm = () => {
+    setMaterial({
+      name: "",
+      model: "",
+      serial_number: "",
+      stock: 0,
+      expiration_date: "",
+      purchase_date: "",
+      description: "",
+      elementsType: 0,
+      status: 0,
+      hotelId: "",
+      proveedorId: "",
+      departamentoId: "",
+    });
+
+    setSubMaterial({
+      name: "",
+      model: "",
+      serial_number: "",
+      stock: 0,
+      expiration_date: "",
+      purchase_date: "",
+      description: "",
+      elementsType: 0,
+      status: 0,
+      hotelId: "",
+      proveedorId: "",
+      departamentoId: "",
+    });
+
+    setSubMaterialsList([]);
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
   const handleAddSubMaterial = async () => {
     const subMaterialData = {
-      name: subMaterial.name,
-      model: subMaterial.model,
-      serial_number: subMaterial.serial_number,
-      stock: subMaterial.stock,
-      expiration_date: subMaterial.expiration_date,
-      purchase_date: subMaterial.purchase_date,
-      description: subMaterial.description,
-      elementsType: subMaterial.elementsType,
-      status: subMaterial.status,
+      ...subMaterial,
       materialtype: 1,
-      hotelId: subMaterial.hotelId,
-      proveedorId: subMaterial.proveedorId,
-      departamentoId: subMaterial.departamentoId,
     };
-
-    console.log("SubMaterialData que se enviará:", subMaterialData);
 
     try {
       const response = await axios.post(
@@ -111,11 +149,19 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
         proveedorId: "",
         departamentoId: "",
       });
+
+      alert("SubMaterial agregado exitosamente.");
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error("Error al crear el submaterial", error.response?.data);
+        alert(
+          `Error al crear el submaterial: ${
+            error.response?.data.message || "Desconocido"
+          }`
+        );
       } else {
         console.error("Error desconocido", error);
+        alert("Error desconocido al crear el submaterial.");
       }
     }
   };
@@ -123,15 +169,12 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    setIsLoading(true);
+
     const materialData = {
       ...material,
-      hotelId: material.hotelId,
-      proveedorId: material.proveedorId,
-      departamentoId: material.departamentoId,
       materialtype: 0,
     };
-
-    console.log("MaterialData que se enviará:", materialData);
 
     try {
       const responseMaterial = await axios.post(
@@ -140,14 +183,12 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
       );
       const newMaterial = responseMaterial.data;
 
-      console.log("Nuevo material creado:", newMaterial);
-
       if (subMaterialsList.length > 0) {
-        const subMaterialIds = subMaterialsList.map((sub) => sub.id);
+        const subMaterialIds = subMaterialsList.map((sub) => sub.idMaterial);
         console.log("IDs de materiales hijos:", subMaterialIds);
 
         const relacionData = {
-          fk_material_padre: newMaterial.id,
+          fk_material_padre: newMaterial.idMaterial,
           fk_material_hijos: subMaterialIds,
           amount: subMaterialsList.length,
         };
@@ -161,17 +202,24 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
       }
 
       onAdd(newMaterial);
-      onClose();
+      alert("Material creado exitosamente.");
+      handleClose();
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error("Error al crear el material", error.response?.data);
+        alert(
+          `Error al crear el material: ${
+            error.response?.data.message || "Desconocido"
+          }`
+        );
       } else {
         console.error("Error desconocido", error);
+        alert("Error desconocido al crear el material.");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  console.log("Hotel ID seleccionado:", subMaterial.hotelId);
 
   if (!isOpen) return null;
 
@@ -191,6 +239,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                     onChange={(e) =>
                       setMaterial({ ...material, name: e.target.value })
                     }
+                    required
                   />
                 </div>
 
@@ -204,6 +253,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         elementsType: parseInt(e.target.value),
                       })
                     }
+                    required
                   >
                     <option value="">Seleccionar</option>
                     <option value={0}>Software</option>
@@ -219,6 +269,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                     onChange={(e) =>
                       setMaterial({ ...material, model: e.target.value })
                     }
+                    required
                   />
                 </div>
 
@@ -232,6 +283,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         status: parseInt(e.target.value),
                       })
                     }
+                    required
                   >
                     <option value="">Seleccionar</option>
                     <option value={0}>Inactivo</option>
@@ -250,6 +302,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         serial_number: e.target.value,
                       })
                     }
+                    required
                   />
                 </div>
 
@@ -260,6 +313,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                     onChange={(e) =>
                       setMaterial({ ...material, proveedorId: e.target.value })
                     }
+                    required
                   >
                     <option value="">Seleccionar</option>
                     {proveedores.map((prov) => (
@@ -281,6 +335,8 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         stock: parseInt(e.target.value),
                       })
                     }
+                    required
+                    min={0}
                   />
                 </div>
 
@@ -294,6 +350,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         departamentoId: e.target.value,
                       })
                     }
+                    required
                   >
                     <option value="">Seleccionar</option>
                     {departamentos.map((dep) => (
@@ -318,6 +375,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         expiration_date: e.target.value,
                       })
                     }
+                    required
                   />
                 </div>
 
@@ -332,6 +390,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         purchase_date: e.target.value,
                       })
                     }
+                    required
                   />
                 </div>
 
@@ -342,6 +401,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                     onChange={(e) =>
                       setMaterial({ ...material, hotelId: e.target.value })
                     }
+                    required
                   >
                     <option value="">Seleccionar</option>
                     {hoteles.map((hotel) => (
@@ -365,18 +425,17 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
 
                 <div className="form-group submaterials-group">
                   <label>SubMateriales Agregados</label>
-                  <div className="checkbox-list">
-                    <div className="submaterials-list">
-                      {subMaterialsList.map((sub, index) => (
-                        <div key={index} className="submaterial-item">
-                          {sub.name} - {sub.model}
-                        </div>
-                      ))}
-                    </div>
+                  <div className="submaterials-list">
+                    {subMaterialsList.map((sub, index) => (
+                      <div key={index} className="submaterial-item">
+                        {sub.name} - {sub.model}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
             </div>
+
             <div className="submaterial-form">
               <h2>Agregar SubMaterial</h2>
               <div className="form-content">
@@ -389,6 +448,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                     onChange={(e) =>
                       setSubMaterial({ ...subMaterial, name: e.target.value })
                     }
+                    required
                   />
                 </div>
 
@@ -402,6 +462,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         elementsType: parseInt(e.target.value),
                       })
                     }
+                    required
                   >
                     <option value="">Seleccionar</option>
                     <option value={0}>Software</option>
@@ -418,6 +479,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                     onChange={(e) =>
                       setSubMaterial({ ...subMaterial, model: e.target.value })
                     }
+                    required
                   />
                 </div>
 
@@ -431,6 +493,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         status: parseInt(e.target.value),
                       })
                     }
+                    required
                   >
                     <option value="">Seleccionar</option>
                     <option value={0}>Inactivo</option>
@@ -450,6 +513,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         serial_number: e.target.value,
                       })
                     }
+                    required
                   />
                 </div>
 
@@ -467,6 +531,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         proveedorId: e.target.value,
                       });
                     }}
+                    required
                   >
                     <option value="">Seleccionar</option>
                     {proveedores.map((prov) => (
@@ -489,6 +554,8 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         stock: parseInt(e.target.value),
                       })
                     }
+                    required
+                    min={0}
                   />
                 </div>
 
@@ -506,6 +573,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         departamentoId: e.target.value,
                       });
                     }}
+                    required
                   >
                     <option value="">Seleccionar</option>
                     {departamentos.map((departamento) => (
@@ -520,7 +588,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                 </div>
 
                 <div className="form-group">
-                  <label>Vencimiento de garantía / Fecha de expiración</label>
+                  <label>Vencimiento de garantía / Fecha de expiración *</label>
                   <input
                     type="date"
                     value={subMaterial.expiration_date}
@@ -530,6 +598,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         expiration_date: e.target.value,
                       })
                     }
+                    required
                   />
                 </div>
 
@@ -544,6 +613,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         purchase_date: e.target.value,
                       })
                     }
+                    required
                   />
                 </div>
 
@@ -552,15 +622,12 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                   <select
                     value={subMaterial.hotelId}
                     onChange={(e) => {
-                      console.log(
-                        "Hotel ID seleccionado (subMaterial):",
-                        e.target.value
-                      );
                       setSubMaterial({
                         ...subMaterial,
                         hotelId: e.target.value,
                       });
                     }}
+                    required
                   >
                     <option value="">Seleccionar</option>
                     {hoteles.map((hotel) => (
@@ -590,6 +657,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                   type="button"
                   className="btn-add-submaterial"
                   onClick={handleAddSubMaterial}
+                  disabled={isLoading}
                 >
                   Agregar SubMaterial
                 </button>
@@ -598,11 +666,16 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn-cancel" onClick={onClose}>
+            <button
+              type="button"
+              className="btn-cancel"
+              onClick={handleClose}
+              disabled={isLoading}
+            >
               Cancelar
             </button>
-            <button type="submit" className="btn-finish">
-              Finalizar
+            <button type="submit" className="btn-finish" disabled={isLoading}>
+              {isLoading ? "Guardando..." : "Finalizar"}
             </button>
           </div>
         </form>
