@@ -6,6 +6,7 @@
   border-radius: 1.5rem;
   display: flex;
   flex-direction: column;
+  transition: transform 0.3s ease-in-out;
 }
 
 .logo-container {
@@ -27,37 +28,11 @@
 .nav-item {
   display: flex;
   align-items: center;
-  padding: 0.75rem 1rem;
-  color: #1a202c;
-  text-decoration: none;
-  border-radius: 0.5rem;
-  transition: background-color 0.2s;
-}
-
-.nav-item:hover {
-  background-color: rgba(59, 130, 246, 0.1);
-}
-
-.nav-item.active {
-  background-color: #3b82f6;
-  color: white;
-}
-
-.nav-item svg {
-  margin-right: 0.75rem;
-}
-
-.nav-item span {
-  font-size: 0.875rem;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
   padding: 12px 16px;
   color: #333;
   text-decoration: none;
   transition: background-color 0.3s, color 0.3s;
+  border-radius: 0.5rem;
 }
 
 .nav-item:hover {
@@ -69,6 +44,26 @@
   color: white;
 }
 
+.nav-item svg {
+  margin-right: 0.75rem;
+}
+
 .nav-item span {
   margin-left: 12px;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 1624px) {
+  .sidebar {
+    width: 200px;
+    padding: 1rem;
+  }
+
+  .nav-item span {
+    font-size: 0.8rem;
+  }
+  .logo {
+    height: 30px;
+    width: auto;
+  }
 }

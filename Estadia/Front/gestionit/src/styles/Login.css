@@ -10,7 +10,7 @@
   padding: 2rem;
 }
 
-.resort-image {
+.login-resort-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -30,17 +30,17 @@
   width: 100%;
 }
 
-.logo-container {
+.login-logo-container {
   margin-bottom: 2rem;
   padding-left: 0.5rem;
 }
 
-.logo-image {
+.login-logo-image {
   height: 70px;
   width: auto;
 }
 
-.welcome-text {
+.login-welcome-text {
   font-size: 2.5rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
@@ -52,18 +52,18 @@
   margin-bottom: 2rem;
 }
 
-.form-group {
+.login-form-group {
   margin-bottom: 1.5rem;
 }
 
-.form-group label {
+.login-form-group label {
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
 }
 
-.form-group input {
+.login-input {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid #ccc;
@@ -71,11 +71,11 @@
   font-size: 1rem;
 }
 
-.password-input-container {
+.login-password-input-container {
   position: relative;
 }
 
-.toggle-password {
+.login-toggle-password {
   position: absolute;
   right: 1rem;
   top: 50%;
@@ -88,7 +88,7 @@
 .login-button {
   width: 100%;
   padding: 0.75rem;
-  background-color: #2563EB;
+  background-color: #2563eb;
   color: white;
   border: none;
   border-radius: 0.375rem;
@@ -100,15 +100,14 @@
 }
 
 .login-button:hover {
-  background-color: #1D4ED8;
+  background-color: #1d4ed8;
 }
 
-/* Media query for tablets and larger screens */
 @media (min-width: 768px) {
   .login-image-container {
     display: block;
   }
-  
+
   .login-form-container {
     width: 50%;
   }

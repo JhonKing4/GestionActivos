@@ -5,6 +5,7 @@ import Side from "../Extras/sidebar";
 import AddMaterialModal from "./AddMaterialModal";
 import DeleteModal from "../Extras/DeleteModal";
 import EditMaterialModal from "./EditMaterial";
+import "../../styles/Tabla.css";
 
 interface Hotel {
   idHotel: string;
@@ -77,70 +78,68 @@ const Material: React.FC = () => {
     );
     setIsEditModalOpen(true);
   };
+  const fetchData = async () => {
+    try {
+      const [materialsResponse, relationsResponse] = await Promise.all([
+        fetch("http://localhost:3002/material"),
+        fetch("http://localhost:3002/relacion-elements"),
+      ]);
+
+      const materialsData = await materialsResponse.json();
+      const relationsData = await relationsResponse.json();
+
+      const processedMaterials = Array.isArray(materialsData)
+        ? materialsData
+        : [materialsData].filter(Boolean);
+      setMaterials(processedMaterials);
+
+      const processedRelations = Array.isArray(relationsData)
+        ? relationsData
+        : [relationsData].filter(Boolean);
+      setRelations(processedRelations);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setMaterials([]);
+      setRelations([]);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [materialsResponse, relationsResponse] = await Promise.all([
-          fetch("http://localhost:3001/material"),
-          fetch("http://localhost:3001/relacion-elements"),
-        ]);
-
-        const materialsData = await materialsResponse.json();
-        const relationsData = await relationsResponse.json();
-
-        const processedMaterials = Array.isArray(materialsData)
-          ? materialsData
-          : [materialsData].filter(Boolean);
-        setMaterials(processedMaterials);
-
-        const processedRelations = Array.isArray(relationsData)
-          ? relationsData
-          : [relationsData].filter(Boolean);
-        setRelations(processedRelations);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setMaterials([]);
-        setRelations([]);
-      }
-    };
-
     fetchData();
   }, []);
 
   const processMaterialsWithHierarchy = () => {
-    if (!materials.length || !relations.length) return;
+    if (!materials.length) return;
 
     const processed: MaterialItem[] = [];
-    const childrenMap = new Map<string, string>();
+    const processedChildrenSet = new Set<string>();
+    const childrenMap = new Map<string, MaterialRelation>();
 
     relations.forEach((relation) => {
-      if (relation.materialesHijos) {
-        relation.materialesHijos.forEach((childMaterial) => {
-          childrenMap.set(
-            childMaterial.idMaterial,
-            relation.materialPadre.idMaterial
-          );
-        });
-      }
+      childrenMap.set(relation.materialPadre.idMaterial, relation);
+      relation.materialesHijos.forEach((child) => {
+        processedChildrenSet.add(child.idMaterial);
+      });
     });
+
+    let parentCounter = 1;
 
     const processChildren = (
       parentId: string,
       parentHierarchy: string,
       depth: number = 0
     ) => {
-      const relationAsParent = relations.find(
-        (rel) => rel.materialPadre.idMaterial === parentId
-      );
+      const relationAsParent = childrenMap.get(parentId);
 
-      if (relationAsParent && relationAsParent.materialesHijos) {
+      if (relationAsParent && relationAsParent.materialesHijos.length > 0) {
         relationAsParent.materialesHijos.forEach((childMaterial, index) => {
           const material = materials.find(
             (m) => m.idMaterial === childMaterial.idMaterial
           );
+
           if (material) {
             const childHierarchy = `${parentHierarchy}.${index + 1}`;
+
             processed.push({
               ...material,
               hierarchyNumber: childHierarchy,
@@ -153,17 +152,20 @@ const Material: React.FC = () => {
       }
     };
 
-    materials.forEach((material, index) => {
-      if (!childrenMap.has(material.idMaterial)) {
-        const hierarchyNumber = `${index + 1}`;
-        processed.push({
-          ...material,
-          hierarchyNumber: hierarchyNumber,
-          depth: 0,
-        });
+    materials.forEach((material) => {
+      if (processedChildrenSet.has(material.idMaterial)) return;
 
-        processChildren(material.idMaterial, hierarchyNumber);
-      }
+      const hierarchyNumber = `${parentCounter}`;
+
+      processed.push({
+        ...material,
+        hierarchyNumber: hierarchyNumber,
+        depth: 0,
+      });
+
+      parentCounter++;
+
+      processChildren(material.idMaterial, hierarchyNumber);
     });
 
     setProcessedMaterials(processed);
@@ -173,8 +175,28 @@ const Material: React.FC = () => {
     processMaterialsWithHierarchy();
   }, [materials, relations]);
 
-  const handleAddMaterial = (materialData: any) => {
+  const handleAddMaterial = async (materialData: any) => {
     setIsModalOpen(false);
+    await fetchData();
+  };
+  const handleDeleteMaterial = async (materialId: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3002/relacion-elements/${materialId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al eliminar el material.");
+      }
+
+      await fetchData();
+      setIsDeleteModalOpen(false);
+    } catch (error) {
+      console.error("Error eliminando material:", error);
+    }
   };
 
   const handleDelete = () => {
@@ -184,7 +206,7 @@ const Material: React.FC = () => {
   return (
     <div className="app-container">
       <Side />
-      <div className="main-container">
+      <div className="main-content">
         <Header userName="Jhoandi" />
         <div className="tabla-content">
           <div className="table-section">
@@ -260,7 +282,10 @@ const Material: React.FC = () => {
                           </button>
                           <button
                             className="action-btn red"
-                            onClick={() => setIsDeleteModalOpen(true)}
+                            onClick={() => {
+                              setSelectedMaterial(item);
+                              setIsDeleteModalOpen(true);
+                            }}
                           >
                             <Trash2 size={18} />
                           </button>
@@ -299,19 +324,26 @@ const Material: React.FC = () => {
       <DeleteModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleDelete}
+        onConfirm={() =>
+          handleDeleteMaterial(selectedMaterial?.idMaterial || "")
+        }
       />
+
       <EditMaterialModal
         isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
+        onClose={async () => {
+          setIsEditModalOpen(false);
+          await fetchData();
+        }}
         material={selectedMaterial || {}}
-        onUpdate={(updatedMaterial) => {
+        onUpdate={async (updatedMaterial) => {
           setMaterials((prev) =>
             prev.map((m) =>
               m.idMaterial === updatedMaterial.idMaterial ? updatedMaterial : m
             )
           );
           setIsEditModalOpen(false);
+          await fetchData();
         }}
       />
     </div>

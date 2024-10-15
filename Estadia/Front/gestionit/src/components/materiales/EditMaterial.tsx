@@ -44,11 +44,11 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
         departamentosRes,
         hotelesRes,
       ] = await Promise.all([
-        axios.get("http://localhost:3001/material"),
-        axios.get("http://localhost:3001/relacion-elements"),
-        axios.get("http://localhost:3001/proveedores"),
-        axios.get("http://localhost:3001/departamentos"),
-        axios.get("http://localhost:3001/hoteles"),
+        axios.get("http://localhost:3002/material"),
+        axios.get("http://localhost:3002/relacion-elements"),
+        axios.get("http://localhost:3002/proveedores"),
+        axios.get("http://localhost:3002/departamentos"),
+        axios.get("http://localhost:3002/hoteles"),
       ]);
 
       const allMaterials = materialsRes.data;
@@ -110,6 +110,12 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
     }
   };
 
+  const isValidUUID = (id: string) => {
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(id);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -133,7 +139,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
 
     try {
       const responseMaterial = await axios.patch(
-        `http://localhost:3001/material/${updatedMaterial.idMaterial}`,
+        `http://localhost:3002/material/${updatedMaterial.idMaterial}`,
         updatedMaterialData
       );
       const newMaterial = responseMaterial.data;
@@ -141,29 +147,41 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
       const relacionData = {
         fk_material_padre: newMaterial.idMaterial,
         fk_material_hijos: selectedMaterials.map((mat) => mat.idMaterial),
-        amount: 1, // You might want to add a field to set this dynamically
+        amount: 1,
       };
 
       const existingRelation = allRelations.find(
-        (rel) => rel.fk_material_padre === newMaterial.idMaterial
+        (rel) => rel.materialPadre.idMaterial === newMaterial.idMaterial
       );
 
       if (existingRelation) {
-        await axios.patch(
-          `http://localhost:3001/relacion-elements/${existingRelation.id}`,
-          relacionData
-        );
+        if (
+          existingRelation &&
+          isValidUUID(existingRelation.idRelacionElement)
+        ) {
+          await axios.patch(
+            `http://localhost:3002/relacion-elements/${existingRelation.idRelacionElement}`,
+            relacionData
+          );
+        } else {
+          await axios.post(
+            `http://localhost:3002/relacion-elements`,
+            relacionData
+          );
+          console.log(
+            "Nueva relación creada debido a un ID inválido o relación no existente."
+          );
+        }
       } else {
         await axios.post(
-          `http://localhost:3001/relacion-elements`,
+          `http://localhost:3002/relacion-elements`,
           relacionData
         );
+        console.log("Nueva relación creada.");
       }
 
       onUpdate(newMaterial);
       onClose();
-      console.log("Respuesta del servidor:", newMaterial);
-      console.log("Datos de relación a enviar:", relacionData);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error("Error al actualizar el material", error.response?.data);
@@ -178,191 +196,225 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
   return (
     <div className="modal">
       <div className="modal-content">
-        <h2>Editar Material</h2>
-        <form onSubmit={handleSubmit}>
-          <label>
-            Nombre:
-            <input
-              type="text"
-              value={updatedMaterial?.name || ""}
-              onChange={(e) =>
-                setUpdatedMaterial({
-                  ...updatedMaterial,
-                  name: e.target.value,
-                })
-              }
-            />
-          </label>
-          <label>
-            Modelo:
-            <input
-              type="text"
-              value={updatedMaterial.model || ""}
-              onChange={(e) =>
-                setUpdatedMaterial({
-                  ...updatedMaterial,
-                  model: e.target.value,
-                })
-              }
-            />
-          </label>
-          <label>
-            Número de Serie:
-            <input
-              type="text"
-              value={updatedMaterial.serial_number || ""}
-              onChange={(e) =>
-                setUpdatedMaterial({
-                  ...updatedMaterial,
-                  serial_number: e.target.value,
-                })
-              }
-            />
-          </label>
-          <label>
-            Stock:
-            <input
-              type="number"
-              value={updatedMaterial.stock || ""}
-              onChange={(e) =>
-                setUpdatedMaterial({
-                  ...updatedMaterial,
-                  stock: Number(e.target.value),
-                })
-              }
-            />
-          </label>
-          <label>
-            Fecha de Expiración:
-            <input
-              type="date"
-              value={updatedMaterial.expiration_date || ""}
-              onChange={(e) =>
-                setUpdatedMaterial({
-                  ...updatedMaterial,
-                  expiration_date: e.target.value,
-                })
-              }
-            />
-          </label>
-          <label>
-            Fecha de Compra:
-            <input
-              type="date"
-              value={updatedMaterial.purchase_date || ""}
-              onChange={(e) =>
-                setUpdatedMaterial({
-                  ...updatedMaterial,
-                  purchase_date: e.target.value,
-                })
-              }
-            />
-          </label>
-          <label>
-            Descripción:
-            <input
-              type="text"
-              value={updatedMaterial.description || ""}
-              onChange={(e) =>
-                setUpdatedMaterial({
-                  ...updatedMaterial,
-                  description: e.target.value,
-                })
-              }
-            />
-          </label>
-
-          <label>
-            Proveedor:
-            <select
-              value={updatedMaterial.idProveedor || ""}
-              onChange={(e) =>
-                setUpdatedMaterial({
-                  ...updatedMaterial,
-                  idProveedor: e.target.value,
-                })
-              }
-            >
-              <option value="">Seleccione un proveedor</option>
-              {proveedores.map((prov) => (
-                <option key={prov.idProveedor} value={prov.idProveedor}>
-                  {prov.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Departamento:
-            <select
-              value={updatedMaterial.idDepartamento || ""}
-              onChange={(e) =>
-                setUpdatedMaterial({
-                  ...updatedMaterial,
-                  idDepartamento: e.target.value,
-                })
-              }
-            >
-              <option value="">Seleccione un departamento</option>
-              {departamentos.map((dept) => (
-                <option key={dept.idDepartamento} value={dept.idDepartamento}>
-                  {dept.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Hotel:
-            <select
-              value={updatedMaterial.idHotel || ""}
-              onChange={(e) =>
-                setUpdatedMaterial({
-                  ...updatedMaterial,
-                  idHotel: e.target.value,
-                })
-              }
-            >
-              <option value="">Seleccione un hotel</option>
-              {hoteles.map((hotel) => (
-                <option key={hotel.idHotel} value={hotel.idHotel}>
-                  {hotel.name}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <h3>Materiales Relacionados</h3>
-          {selectedMaterials.map((mat) => (
-            <div key={mat.idMaterial}>
-              <label>
+        <h2 className="modal-title">Editar Material</h2>
+        <div className="modal-layout">
+          <form onSubmit={handleSubmit} className="edit-form">
+            <div className="form-grid">
+              <div className="form-group">
+                <label htmlFor="name">Nombre:</label>
                 <input
-                  type="checkbox"
-                  checked={true}
-                  onChange={() => handleMaterialToggle(mat)}
+                  id="name"
+                  type="text"
+                  value={updatedMaterial?.name || ""}
+                  onChange={(e) =>
+                    setUpdatedMaterial({
+                      ...updatedMaterial,
+                      name: e.target.value,
+                    })
+                  }
                 />
-                {mat.name} (Stock: {mat.stock})
-              </label>
-            </div>
-          ))}
-
-          <h3>Materiales Disponibles</h3>
-          {availableMaterials.map((mat) => (
-            <div key={mat.idMaterial}>
-              <label>
+              </div>
+              <div className="form-group">
+                <label htmlFor="model">Modelo:</label>
                 <input
-                  type="checkbox"
-                  checked={false}
-                  onChange={() => handleMaterialToggle(mat)}
+                  id="model"
+                  type="text"
+                  value={updatedMaterial.model || ""}
+                  onChange={(e) =>
+                    setUpdatedMaterial({
+                      ...updatedMaterial,
+                      model: e.target.value,
+                    })
+                  }
                 />
-                {mat.name} (Stock: {mat.stock})
-              </label>
+              </div>
+              <div className="form-group">
+                <label htmlFor="serial_number">Número de Serie:</label>
+                <input
+                  id="serial_number"
+                  type="text"
+                  value={updatedMaterial.serial_number || ""}
+                  onChange={(e) =>
+                    setUpdatedMaterial({
+                      ...updatedMaterial,
+                      serial_number: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="stock">Stock:</label>
+                <input
+                  id="stock"
+                  type="number"
+                  value={updatedMaterial.stock || ""}
+                  onChange={(e) =>
+                    setUpdatedMaterial({
+                      ...updatedMaterial,
+                      stock: Number(e.target.value),
+                    })
+                  }
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="expiration_date">Fecha de Expiración:</label>
+                <input
+                  id="expiration_date"
+                  type="date"
+                  value={updatedMaterial.expiration_date || ""}
+                  onChange={(e) =>
+                    setUpdatedMaterial({
+                      ...updatedMaterial,
+                      expiration_date: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="purchase_date">Fecha de Compra:</label>
+                <input
+                  id="purchase_date"
+                  type="date"
+                  value={updatedMaterial.purchase_date || ""}
+                  onChange={(e) =>
+                    setUpdatedMaterial({
+                      ...updatedMaterial,
+                      purchase_date: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="description">Descripción:</label>
+                <input
+                  id="description"
+                  value={updatedMaterial.description || ""}
+                  onChange={(e) =>
+                    setUpdatedMaterial({
+                      ...updatedMaterial,
+                      description: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="idProveedor">Proveedor:</label>
+                <select
+                  id="idProveedor"
+                  value={updatedMaterial.idProveedor || ""}
+                  onChange={(e) =>
+                    setUpdatedMaterial({
+                      ...updatedMaterial,
+                      idProveedor: e.target.value,
+                    })
+                  }
+                >
+                  <option value="">Seleccione un proveedor</option>
+                  {proveedores.map((prov) => (
+                    <option key={prov.idProveedor} value={prov.idProveedor}>
+                      {prov.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="idDepartamento">Departamento:</label>
+                <select
+                  id="idDepartamento"
+                  value={updatedMaterial.idDepartamento || ""}
+                  onChange={(e) =>
+                    setUpdatedMaterial({
+                      ...updatedMaterial,
+                      idDepartamento: e.target.value,
+                    })
+                  }
+                >
+                  <option value="">Seleccione un departamento</option>
+                  {departamentos.map((dept) => (
+                    <option
+                      key={dept.idDepartamento}
+                      value={dept.idDepartamento}
+                    >
+                      {dept.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="idHotel">Hotel:</label>
+                <select
+                  id="idHotel"
+                  value={updatedMaterial.idHotel || ""}
+                  onChange={(e) =>
+                    setUpdatedMaterial({
+                      ...updatedMaterial,
+                      idHotel: e.target.value,
+                    })
+                  }
+                >
+                  <option value="">Seleccione un hotel</option>
+                  {hoteles.map((hotel) => (
+                    <option key={hotel.idHotel} value={hotel.idHotel}>
+                      {hotel.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-          ))}
-
-          <button type="submit">Guardar Cambios</button>
-          <button type="button" onClick={onClose}>
-            Cancelar
-          </button>
-        </form>
+            <div className="form-actions">
+              <button type="submit" className="btn btn-primary">
+                Guardar Cambios
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={onClose}
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+          <div className="materials-section">
+            <div className="materials-container">
+              <div className="related-materials">
+                <h3>Materiales Relacionados</h3>
+                <div className="materials-list">
+                  {selectedMaterials.map((mat) => (
+                    <div key={mat.idMaterial} className="material-item">
+                      <label className="checkbox-container">
+                        <input
+                          type="checkbox"
+                          checked={true}
+                          onChange={() => handleMaterialToggle(mat)}
+                        />
+                        <span className="checkmark"></span>
+                        {mat.name} (Stock: {mat.stock})
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="available-materials">
+                <h3>Materiales Disponibles</h3>
+                <div className="materials-list">
+                  {availableMaterials.map((mat) => (
+                    <div key={mat.idMaterial} className="material-item">
+                      <label className="checkbox-container">
+                        <input
+                          type="checkbox"
+                          checked={false}
+                          onChange={() => handleMaterialToggle(mat)}
+                        />
+                        <span className="checkmark"></span>
+                        {mat.name} (Stock: {mat.stock})
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

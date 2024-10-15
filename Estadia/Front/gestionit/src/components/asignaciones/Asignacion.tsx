@@ -53,6 +53,13 @@ const Asignacion = () => {
     null
   );
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(2);
+  const totalPages = Math.ceil(assignmentData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedData = assignmentData.slice(startIndex, endIndex);
+
   const fetchAssigment = async () => {
     try {
       const response = await axios.get("http://localhost:3001/asignacion");
@@ -106,6 +113,13 @@ const Asignacion = () => {
     setEditingAsignacionId(null);
   };
 
+  const handleItemsPerPageChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1);
+  };
+
   if (loading) return <p>Cargando ...</p>;
   if (error) return <p>{error}</p>;
 
@@ -141,7 +155,7 @@ const Asignacion = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {assignmentData.map((item) => (
+                  {paginatedData.map((item) => (
                     <tr key={item.idAsignacion}>
                       <td>
                         {item.material.map((material) => (
@@ -195,20 +209,37 @@ const Asignacion = () => {
               </table>
             </div>
             <div className="table-footer">
-              <div className="showing-entries">
-                <span>Mostrando</span>
-                <select defaultValue="10">
-                  <option value="10">10</option>
-                  <option value="20">20</option>
-                  <option value="30">30</option>
-                </select>
-              </div>
+              <div className="showing-entries"></div>
               <div className="pagination">
-                <button className="page-btn">←</button>
-                <button className="page-btn active">1</button>
-                <button className="page-btn">2</button>
-                <button className="page-btn">3</button>
-                <button className="page-btn">→</button>
+                <button
+                  className="page-btn"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                  }
+                  disabled={currentPage === 1}
+                >
+                  ←
+                </button>
+                {Array.from({ length: totalPages }, (_, index) => (
+                  <button
+                    key={index + 1}
+                    className={`page-btn ${
+                      currentPage === index + 1 ? "active" : ""
+                    }`}
+                    onClick={() => setCurrentPage(index + 1)}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+                <button
+                  className="page-btn"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
+                  disabled={currentPage === totalPages}
+                >
+                  →
+                </button>
               </div>
             </div>
           </div>

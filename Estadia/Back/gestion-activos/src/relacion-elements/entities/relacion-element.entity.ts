@@ -24,7 +24,7 @@ export class RelacionElement {
     description: 'IDs de los Materiales Hijos de la relación',
     type: [String],
   })
-  @Column('uuid', { array: true, nullable: false })
+  @Column('uuid', { array: true, nullable: true })
   materialHijos: string[];
 
   @ApiProperty({

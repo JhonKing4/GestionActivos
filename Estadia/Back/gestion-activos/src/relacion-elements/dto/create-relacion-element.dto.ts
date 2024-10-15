@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsUUID, Min } from 'class-validator';
+import { IsInt, IsNotEmpty, IsOptional, IsUUID, Min } from 'class-validator';
 
 export class CreateRelacionElementDto {
   @ApiProperty({
@@ -14,11 +14,11 @@ export class CreateRelacionElementDto {
   @ApiProperty({
     example: ['b7ba0f09-5a6e-4146-93c2-0c9b934162ff'],
     description: 'IDs de los Materiales Hijos',
-    nullable: false,
+    nullable: true,
     isArray: true,
     type: [String],
   })
-  @IsNotEmpty({ message: 'El Material Hijo no puede estar vacío' })
+  @IsOptional()
   @IsUUID('all', { each: true })
   fk_material_hijos: string[];
 

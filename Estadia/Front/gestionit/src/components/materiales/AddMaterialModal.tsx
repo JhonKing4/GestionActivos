@@ -185,7 +185,6 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
 
       if (subMaterialsList.length > 0) {
         const subMaterialIds = subMaterialsList.map((sub) => sub.idMaterial);
-        console.log("IDs de materiales hijos:", subMaterialIds);
 
         const relacionData = {
           fk_material_padre: newMaterial.idMaterial,
@@ -448,7 +447,6 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                     onChange={(e) =>
                       setSubMaterial({ ...subMaterial, name: e.target.value })
                     }
-                    required
                   />
                 </div>
 
@@ -462,7 +460,6 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         elementsType: parseInt(e.target.value),
                       })
                     }
-                    required
                   >
                     <option value="">Seleccionar</option>
                     <option value={0}>Software</option>
@@ -479,7 +476,6 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                     onChange={(e) =>
                       setSubMaterial({ ...subMaterial, model: e.target.value })
                     }
-                    required
                   />
                 </div>
 
@@ -493,7 +489,6 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         status: parseInt(e.target.value),
                       })
                     }
-                    required
                   >
                     <option value="">Seleccionar</option>
                     <option value={0}>Inactivo</option>
@@ -513,7 +508,6 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         serial_number: e.target.value,
                       })
                     }
-                    required
                   />
                 </div>
 
@@ -531,7 +525,6 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         proveedorId: e.target.value,
                       });
                     }}
-                    required
                   >
                     <option value="">Seleccionar</option>
                     {proveedores.map((prov) => (
@@ -554,7 +547,6 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         stock: parseInt(e.target.value),
                       })
                     }
-                    required
                     min={0}
                   />
                 </div>
@@ -573,7 +565,6 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         departamentoId: e.target.value,
                       });
                     }}
-                    required
                   >
                     <option value="">Seleccionar</option>
                     {departamentos.map((departamento) => (
@@ -598,7 +589,6 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         expiration_date: e.target.value,
                       })
                     }
-                    required
                   />
                 </div>
 
@@ -613,7 +603,6 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         purchase_date: e.target.value,
                       })
                     }
-                    required
                   />
                 </div>
 
@@ -627,7 +616,6 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                         hotelId: e.target.value,
                       });
                     }}
-                    required
                   >
                     <option value="">Seleccionar</option>
                     {hoteles.map((hotel) => (

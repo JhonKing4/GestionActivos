@@ -163,6 +163,46 @@ export class RelacionElementsService {
   }
 
   async remove(id: string): Promise<void> {
-    await this.relacionElementRepository.delete(id);
+    const isParentRelation = await this.relacionElementRepository.findOne({
+      where: { materialPadre: { idMaterial: id } },
+    });
+
+    if (isParentRelation) {
+      await this.relacionElementRepository.delete(
+        isParentRelation.idRelacionElement,
+      );
+
+      await this.materialRepository.delete(id);
+
+      return;
+    }
+
+    const isChildRelation = await this.relacionElementRepository
+      .createQueryBuilder('rel')
+      .where(':id = ANY (rel.materialHijos)', { id })
+      .getOne();
+
+    if (isChildRelation) {
+      isChildRelation.materialHijos = isChildRelation.materialHijos.filter(
+        (hijoId) => hijoId !== id,
+      );
+
+      if (isChildRelation.materialHijos.length === 0) {
+        await this.relacionElementRepository.delete(
+          isChildRelation.idRelacionElement,
+        );
+      } else {
+        await this.relacionElementRepository.save(isChildRelation);
+      }
+    }
+
+    const otherRelations = await this.relacionElementRepository
+      .createQueryBuilder('rel')
+      .where(':id = ANY (rel.materialHijos)', { id })
+      .getCount();
+
+    if (otherRelations === 0) {
+      await this.materialRepository.delete(id);
+    }
   }
 }

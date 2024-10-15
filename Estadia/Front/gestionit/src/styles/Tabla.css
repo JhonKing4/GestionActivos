@@ -124,3 +124,24 @@ td {
   color: white;
   border-color: #0066cc;
 }
+
+@media (max-width: 1650px) {
+  .section-header h2 {
+    font-size: 18px;
+  }
+
+  th,
+  td {
+    font-size: 12px;
+    padding: 10px;
+  }
+
+  .add-button {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .pagination {
+    gap: 6px;
+  }
+}

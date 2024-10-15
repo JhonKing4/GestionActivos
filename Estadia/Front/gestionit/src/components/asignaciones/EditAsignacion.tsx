@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
-import "../../styles/ModalAddEdit.css";
+import "../../styles/AssignmentModal.css";
 
 interface EditAssignmentProps {
   isOpen: boolean;
@@ -175,64 +175,120 @@ const EditAssignment = ({
         <div className="modal-header">
           <h2>Editar Asignación</h2>
           <button className="close-button" onClick={onClose}>
-            &times;
+            ×
           </button>
         </div>
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="assignmentDate">Fecha de Asignación</label>
-            <input
-              type="date"
-              id="assignmentDate"
-              name="assignmentDate"
-              value={formData.assignmentDate}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="returnDate">Fecha de Devolución</label>
-            <input
-              type="date"
-              id="returnDate"
-              name="returnDate"
-              value={formData.returnDate}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="observation">Observación</label>
-            <input
-              type="text"
-              id="observation"
-              name="observation"
-              value={formData.observation}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="statusAsig">Estado</label>
-            <select
-              id="statusAsig"
-              name="statusAsig"
-              value={formData.statusAsig}
-              onChange={handleInputChange}
-              required
-            >
-              <option value={0}>Activa</option>
-              <option value={1}>Completado</option>
-              <option value={2}>Pendiente</option>
-              <option value={3}>Cancelada</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label>Materiales Disponibles</label>
-            <div className="checkbox-group">
-              {availableMaterials.length > 0 ? (
-                availableMaterials.map((material) => (
-                  <div key={material.idMaterial}>
+          <div className="modal-body">
+            <div className="form-section">
+              <div className="form-group">
+                <label htmlFor="assignmentDate">Fecha de Asignación</label>
+                <input
+                  type="date"
+                  id="assignmentDate"
+                  name="assignmentDate"
+                  value={formData.assignmentDate}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="returnDate">Fecha de Devolución</label>
+                <input
+                  type="date"
+                  id="returnDate"
+                  name="returnDate"
+                  value={formData.returnDate}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="observation">Observación</label>
+                <input
+                  type="text"
+                  id="observation"
+                  name="observation"
+                  value={formData.observation}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="statusAsig">Estado</label>
+                <select
+                  id="statusAsig"
+                  name="statusAsig"
+                  value={formData.statusAsig}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value={0}>Activa</option>
+                  <option value={1}>Completado</option>
+                  <option value={2}>Pendiente</option>
+                  <option value={3}>Cancelada</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="usuarioId">Usuario</label>
+                <select
+                  id="usuarioId"
+                  name="usuarioId"
+                  value={formData.usuarioId}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Seleccionar usuario</option>
+                  {users.map((user) => (
+                    <option key={user.idUsuario} value={user.idUsuario}>
+                      {user.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="departamentoId">Departamento</label>
+                <select
+                  id="departamentoId"
+                  name="departamentoId"
+                  value={formData.departamentoId}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Seleccionar departamento</option>
+                  {departments.map((department) => (
+                    <option
+                      key={department.idDepartamento}
+                      value={department.idDepartamento}
+                    >
+                      {department.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="hotelId">Hotel</label>
+                <select
+                  id="hotelId"
+                  name="hotelId"
+                  value={formData.hotelId}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Seleccionar hotel</option>
+                  {hotels.map((hotel) => (
+                    <option key={hotel.idHotel} value={hotel.idHotel}>
+                      {hotel.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="materials-section">
+              <h3>Materiales Disponibles</h3>
+              <div className="checkbox-group">
+                {availableMaterials.map((material) => (
+                  <div key={material.idMaterial} className="checkbox-item">
                     <input
                       type="checkbox"
                       id={`material-${material.idMaterial}`}
@@ -246,71 +302,17 @@ const EditAssignment = ({
                       {material.name} - {material.serial_number}
                     </label>
                   </div>
-                ))
-              ) : (
-                <p>No hay materiales disponibles</p>
-              )}
+                ))}
+              </div>
             </div>
           </div>
-          <div className="form-group">
-            <label htmlFor="usuarioId">Usuario</label>
-            <select
-              id="usuarioId"
-              name="usuarioId"
-              value={formData.usuarioId}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="">Seleccionar usuario</option>
-              {users.map((user) => (
-                <option key={user.idUsuario} value={user.idUsuario}>
-                  {user.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group">
-            <label htmlFor="departamentoId">Departamento</label>
-            <select
-              id="departamentoId"
-              name="departamentoId"
-              value={formData.departamentoId}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="">Seleccionar departamento</option>
-              {departments.map((department) => (
-                <option
-                  key={department.idDepartamento}
-                  value={department.idDepartamento}
-                >
-                  {department.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group">
-            <label htmlFor="hotelId">Hotel</label>
-            <select
-              id="hotelId"
-              name="hotelId"
-              value={formData.hotelId}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="">Seleccionar hotel</option>
-              {hotels.map((hotel) => (
-                <option key={hotel.idHotel} value={hotel.idHotel}>
-                  {hotel.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="button-group">
-            <button className="cancel-button" type="button" onClick={onClose}>
+          <div className="modal-footer">
+            <button type="button" className="cancel-button" onClick={onClose}>
               Cancelar
             </button>
-            <button className="submit-button">Guardar Cambios</button>
+            <button type="submit" className="submit-button">
+              Guardar Cambios
+            </button>
           </div>
         </form>
       </div>
