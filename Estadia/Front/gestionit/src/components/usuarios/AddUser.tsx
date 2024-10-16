@@ -13,6 +13,7 @@ const AddUser = ({ isOpen, onClose, onUserAdded }: AddUserProps) => {
     name: "",
     email: "",
     password: "",
+    numberColaborador: "",
     roles: 1,
   });
 
@@ -36,6 +37,8 @@ const AddUser = ({ isOpen, onClose, onUserAdded }: AddUserProps) => {
         name: "",
         email: "",
         password: "",
+        numberColaborador: "",
+
       }));
       onClose();
     } catch (error) {
@@ -74,6 +77,18 @@ const AddUser = ({ isOpen, onClose, onUserAdded }: AddUserProps) => {
               id="email"
               name="email"
               value={formData.email}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="numberColaborador">Numero de colaborador</label>
+            <input
+              type="number"
+              id="numberColaborador"
+              name="numberColaborador"
+              value={formData.numberColaborador}
               onChange={handleInputChange}
               required
             />

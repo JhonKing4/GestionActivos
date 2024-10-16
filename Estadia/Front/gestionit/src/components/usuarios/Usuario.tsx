@@ -7,12 +7,14 @@ import "../../styles/Tabla.css";
 import DeleteConfirmationModal from "../Extras/DeleteModal";
 import AddUser from "./AddUser";
 import EditUser from "./EditUser";
+import Loader from "../Extras/loading";
 
 interface AssignmentItem {
   idUsuario: string;
   name: string;
   email: string;
   password: string;
+  numberColaborador: string;
   roles: number;
 }
 
@@ -25,6 +27,7 @@ const Usuario = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const fetchUsers = async () => {
     try {
@@ -63,6 +66,37 @@ const Usuario = () => {
     setSelectedUser(null);
   };
 
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      fetchUsers();
+    }
+  }, [searchTerm]);
+
+  const handleSearch = async () => {
+    if (searchTerm.trim() === "") {
+      fetchUsers();
+      return;
+    }
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/usuario/search/${searchTerm}`
+      );
+      if (response.status === 200 && Array.isArray(response.data)) {
+        if (response.data.length > 0) {
+          setUsers(response.data);
+        } else {
+          setUsers([]);
+        }
+      }
+    } catch (err: any) {
+      if (err.response && err.response.status === 200) {
+        setUsers([]);
+      } else {
+        setError("Error fetching search results");
+      }
+    }
+  };
+
   const handleEditClick = (idUsuario: string) => {
     setEditingUserId(idUsuario);
     setIsEditModalOpen(true);
@@ -73,7 +107,7 @@ const Usuario = () => {
     setEditingUserId(null);
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Loader />;
   if (error) return <p>{error}</p>;
 
   return (
@@ -85,6 +119,27 @@ const Usuario = () => {
           <div className="table-section">
             <div className="section-header">
               <h2>Usuarios</h2>
+              <div className="search-group">
+                <svg
+                  className="search-icon"
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                >
+                  <g>
+                    <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path>
+                  </g>
+                </svg>
+                <input
+                  placeholder="Search"
+                  type="search"
+                  className="search-input"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <button className="searchs-button" onClick={handleSearch}>
+                  Buscar
+                </button>
+              </div>
               <button
                 className="add-button"
                 onClick={() => setIsAddModalOpen(true)}
@@ -98,36 +153,46 @@ const Usuario = () => {
                   <tr>
                     <th>Nombre</th>
                     <th>Email</th>
+                    <th>Numero de Colaborador</th>
                     <th>Contraseña</th>
                     <th>Rol</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((user) => (
-                    <tr key={user.idUsuario}>
-                      <td>{user.name}</td>
-                      <td>{user.email}</td>
-                      <td>{user.password}</td>
-                      <td>{user.roles === 0 ? "Admin" : "Colaborador"}</td>
-                      <td>
-                        <div className="action-buttons">
-                          <button
-                            className="action-btn yellow"
-                            onClick={() => handleEditClick(user.idUsuario)}
-                          >
-                            <Pencil size={18} />
-                          </button>
-                          <button
-                            className="action-btn red"
-                            onClick={() => handleDeleteClick(user.idUsuario)}
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
+                  {users.length > 0 ? (
+                    users.map((user) => (
+                      <tr key={user.idUsuario}>
+                        <td>{user.name}</td>
+                        <td>{user.email}</td>
+                        <td>{user.numberColaborador}</td>
+                        <td>{user.password}</td>
+                        <td>{user.roles === 0 ? "Admin" : "Colaborador"}</td>
+                        <td>
+                          <div className="action-buttons">
+                            <button
+                              className="action-btn yellow"
+                              onClick={() => handleEditClick(user.idUsuario)}
+                            >
+                              <Pencil size={18} />
+                            </button>
+                            <button
+                              className="action-btn red"
+                              onClick={() => handleDeleteClick(user.idUsuario)}
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} style={{ textAlign: "center" }}>
+                        No se encontraron resultados
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>

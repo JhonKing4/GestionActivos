@@ -19,6 +19,7 @@ const EditUser = ({
     name: "",
     email: "",
     password: "",
+    numberColaborador: "",
     roles: 1,
   });
 
@@ -32,6 +33,7 @@ const EditUser = ({
           name: response.data.name,
           email: response.data.email,
           password: "",
+          numberColaborador: response.data.numberColaborador,
           roles: response.data.roles,
         });
       } catch (error) {
@@ -60,6 +62,7 @@ const EditUser = ({
     const updatedData = {
       name: formData.name,
       email: formData.email,
+      numberColaborador: formData.numberColaborador,
       roles: formData.roles,
     };
 
@@ -103,6 +106,18 @@ const EditUser = ({
               id="email"
               name="email"
               value={formData.email}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="numberColaborador">Numero de Colaborador</label>
+            <input
+              type="number"
+              id="numberColaborador"
+              name="numberColaborador"
+              value={formData.numberColaborador}
               onChange={handleInputChange}
               required
             />

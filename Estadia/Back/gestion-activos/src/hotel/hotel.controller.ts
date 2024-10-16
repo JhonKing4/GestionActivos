@@ -90,4 +90,19 @@ export class HotelController {
   async remove(@Param('id') id: string): Promise<void> {
     return this.hotelService.remove(id);
   }
+
+  @Get('name/:name')
+  @ApiOperation({ summary: 'Buscar hoteles por nombre' })
+  @ApiResponse({
+    status: 200,
+    description: 'Hoteles encontrados con éxito',
+    type: [Hotel],
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No se encontraron hoteles con ese nombre',
+  })
+  findByName(@Param('name') name: string): Promise<Hotel[]> {
+    return this.hotelService.findByName(name);
+  }
 }

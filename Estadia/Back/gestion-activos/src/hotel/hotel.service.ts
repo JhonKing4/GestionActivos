@@ -2,14 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateHotelDto } from './dto/create-hotel.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Hotel } from './entities/hotel.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 
 @Injectable()
 export class HotelService {
   constructor(
     @InjectRepository(Hotel)
     private hotelRepository: Repository<Hotel>,
-  ) {}
+  ) { }
 
   async create(createHotelDto: CreateHotelDto): Promise<Hotel> {
     const hotel = this.hotelRepository.create(createHotelDto);
@@ -45,5 +45,14 @@ export class HotelService {
   async remove(id: string): Promise<void> {
     const hotel = await this.findOne(id);
     await this.hotelRepository.remove(hotel);
+  }
+
+  async findByName(name: string): Promise<Hotel[]> {
+    if (!name) {
+      return this.hotelRepository.find();
+    }
+    return this.hotelRepository.find({
+      where: { name: ILike(`%${name}%`) },
+    });
   }
 }

@@ -15,7 +15,7 @@ import { Departamento } from './entities/departamento.entity';
 @ApiTags('Departamentos')
 @Controller('departamentos')
 export class DepartamentoController {
-  constructor(private readonly departamentoService: DepartamentoService) {}
+  constructor(private readonly departamentoService: DepartamentoService) { }
 
   @Post()
   @ApiOperation({ summary: 'Crear un nuevo proveedor' })
@@ -95,5 +95,20 @@ export class DepartamentoController {
   @ApiResponse({ status: 500, description: 'Ocurrió un error en el servidor' })
   async remove(@Param('id') id: string): Promise<void> {
     return this.departamentoService.remove(id);
+  }
+
+  @Get('name/:name')
+  @ApiOperation({ summary: 'Buscar Departamentos por nombre' })
+  @ApiResponse({
+    status: 200,
+    description: 'Departamentos encontrados con éxito',
+    type: [Departamento],
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No se encontraron Departamentos con ese nombre',
+  })
+  findByName(@Param('name') name: string): Promise<Departamento[]> {
+    return this.departamentoService.findByName(name);
   }
 }

@@ -7,6 +7,7 @@ import axios from "axios";
 import DeleteConfirmationModal from "../Extras/DeleteModal";
 import AddProveedor from "./AddProveedor";
 import EditProveedor from "./EditProveedor";
+import Loader from "../Extras/loading";
 
 interface AssignmentItem {
   idProveedor: string;
@@ -84,7 +85,7 @@ const Proveedor = () => {
     setEditingProveedorId(null);
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Loader />;
   if (error) return <p>{error}</p>;
 
   return (

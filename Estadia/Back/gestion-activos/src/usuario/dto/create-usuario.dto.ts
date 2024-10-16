@@ -50,4 +50,13 @@ export class CreateUsuarioDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
+
+  @ApiProperty({
+    description: 'Colocar el numero de colaborador',
+    uniqueItems: true,
+    nullable: false,
+  })
+  @IsString()
+  @IsNotEmpty()
+  numberColaborador: string;
 }

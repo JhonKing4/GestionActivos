@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDepartamentoDto } from './dto/create-departamento.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Departamento } from './entities/departamento.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Proveedor } from 'src/proveedor/entities/proveedor.entity';
 
 @Injectable()
@@ -10,7 +10,7 @@ export class DepartamentoService {
   constructor(
     @InjectRepository(Departamento)
     private departamentoRepository: Repository<Departamento>,
-  ) {}
+  ) { }
 
   async create(
     createDepartamentoDto: CreateDepartamentoDto,
@@ -53,5 +53,14 @@ export class DepartamentoService {
   async remove(id: string): Promise<void> {
     const departamento = await this.findOne(id);
     await this.departamentoRepository.remove(departamento);
+  }
+
+  async findByName(name: string): Promise<Departamento[]> {
+    if (!name) {
+      return this.departamentoRepository.find();
+    }
+    return this.departamentoRepository.find({
+      where: { name: ILike(`%${name}`) },
+    });
   }
 }

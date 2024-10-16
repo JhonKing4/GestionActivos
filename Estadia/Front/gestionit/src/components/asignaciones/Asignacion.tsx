@@ -7,6 +7,8 @@ import "../../styles/Tabla.css";
 import DeleteConfirmationModal from "../Extras/DeleteModal";
 import AddAssignment from "./AddAsignacion";
 import EditAssignment from "./EditAsignacion";
+import { PDFDownloadButton } from "../Extras/Plantilla";
+import Loader from "../Extras/loading"
 
 interface Material {
   idMaterial: string;
@@ -120,7 +122,7 @@ const Asignacion = () => {
     setCurrentPage(1);
   };
 
-  if (loading) return <p>Cargando ...</p>;
+  if (loading) return <Loader />;
   if (error) return <p>{error}</p>;
 
   return (
@@ -186,9 +188,7 @@ const Asignacion = () => {
                       <td>{item.hotel.name}</td>
                       <td>
                         <div className="action-buttons">
-                          <button className="action-btn">
-                            <Download size={18} />
-                          </button>
+                          <PDFDownloadButton assignmentId={item.idAsignacion} />
                           <button
                             className="action-btn yellow"
                             onClick={() => handleEditClick(item.idAsignacion)}

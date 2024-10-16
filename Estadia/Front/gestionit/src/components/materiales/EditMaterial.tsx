@@ -44,11 +44,11 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
         departamentosRes,
         hotelesRes,
       ] = await Promise.all([
-        axios.get("http://localhost:3002/material"),
-        axios.get("http://localhost:3002/relacion-elements"),
-        axios.get("http://localhost:3002/proveedores"),
-        axios.get("http://localhost:3002/departamentos"),
-        axios.get("http://localhost:3002/hoteles"),
+        axios.get("http://localhost:3001/material"),
+        axios.get("http://localhost:3001/relacion-elements"),
+        axios.get("http://localhost:3001/proveedores"),
+        axios.get("http://localhost:3001/departamentos"),
+        axios.get("http://localhost:3001/hoteles"),
       ]);
 
       const allMaterials = materialsRes.data;
@@ -139,7 +139,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
 
     try {
       const responseMaterial = await axios.patch(
-        `http://localhost:3002/material/${updatedMaterial.idMaterial}`,
+        `http://localhost:3001/material/${updatedMaterial.idMaterial}`,
         updatedMaterialData
       );
       const newMaterial = responseMaterial.data;
@@ -160,12 +160,12 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
           isValidUUID(existingRelation.idRelacionElement)
         ) {
           await axios.patch(
-            `http://localhost:3002/relacion-elements/${existingRelation.idRelacionElement}`,
+            `http://localhost:3001/relacion-elements/${existingRelation.idRelacionElement}`,
             relacionData
           );
         } else {
           await axios.post(
-            `http://localhost:3002/relacion-elements`,
+            `http://localhost:3001/relacion-elements`,
             relacionData
           );
           console.log(
@@ -174,7 +174,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
         }
       } else {
         await axios.post(
-          `http://localhost:3002/relacion-elements`,
+          `http://localhost:3001/relacion-elements`,
           relacionData
         );
         console.log("Nueva relación creada.");

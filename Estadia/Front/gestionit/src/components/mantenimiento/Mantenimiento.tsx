@@ -7,6 +7,7 @@ import axios from "axios";
 import DeleteConfirmationModal from "../Extras/DeleteModal";
 import AddMaintenance from "./AddMantenimiento";
 import EditMaintenance from "./EditMantenimiento";
+import Loader from "../Extras/loading";
 
 interface Material {
   idMaterial: string;
@@ -91,7 +92,7 @@ const Mantenimiento = () => {
     setEditingMantenimientoId(null);
   };
 
-  if (loading) return <p>Cargando...</p>;
+  if (loading) return <Loader />;
   if (error) return <p>{error}</p>;
 
   return (

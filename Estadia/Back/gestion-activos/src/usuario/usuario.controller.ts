@@ -105,4 +105,19 @@ export class UsuarioController {
   async remove(@Param('id') id: string): Promise<void> {
     return await this.usuarioService.remove(id);
   }
+
+  @Get('search/:searchTerm')
+  @ApiOperation({ summary: 'Buscar usuarios por nombre, email o rol' })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuarios encontrados con éxito',
+    type: [Usuario],
+  })
+  @ApiResponse({ status: 404, description: 'Usuarios no encontrados' })
+  @ApiResponse({ status: 500, description: 'Ocurrió un error en el servidor' })
+  async findByNameEmailOrRole(
+    @Param('searchTerm') searchTerm: string,
+  ): Promise<Usuario[]> {
+    return await this.usuarioService.findByNameEmailOrRole(searchTerm);
+  }
 }

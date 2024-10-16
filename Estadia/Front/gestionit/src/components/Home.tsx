@@ -6,8 +6,6 @@ import "../styles/Home.css";
 import "../styles/Sidebar.css";
 import Header from "./Extras/header";
 import Side from "./Extras/sidebar";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import MyDocument from "./Extras/Plantilla";
 
 interface Material {
   idMaterial: string;
@@ -176,14 +174,6 @@ const Home = () => {
               <div className="stat-number">{countOutOfStockMaterials()}</div>
               <div className="stat-label">Materiales sin stock</div>
             </div>
-          </div>
-          <div className="pdf-download-section">
-            <PDFDownloadLink
-              document={<MyDocument />}
-              fileName="mi_documento.pdf"
-            >
-              <button>Downlown</button>
-            </PDFDownloadLink>
           </div>
         </div>
       </div>

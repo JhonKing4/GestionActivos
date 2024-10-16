@@ -81,8 +81,8 @@ const Material: React.FC = () => {
   const fetchData = async () => {
     try {
       const [materialsResponse, relationsResponse] = await Promise.all([
-        fetch("http://localhost:3002/material"),
-        fetch("http://localhost:3002/relacion-elements"),
+        fetch("http://localhost:3001/material"),
+        fetch("http://localhost:3001/relacion-elements"),
       ]);
 
       const materialsData = await materialsResponse.json();
@@ -182,7 +182,7 @@ const Material: React.FC = () => {
   const handleDeleteMaterial = async (materialId: string) => {
     try {
       const response = await fetch(
-        `http://localhost:3002/relacion-elements/${materialId}`,
+        `http://localhost:3001/relacion-elements/${materialId}`,
         {
           method: "DELETE",
         }

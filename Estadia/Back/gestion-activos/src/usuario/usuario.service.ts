@@ -6,7 +6,7 @@ import {
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { Usuario } from './entities/usuario.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoginUsuarioDto } from './dto/login.dto';
 
@@ -68,5 +68,23 @@ export class UsuarioService {
   async remove(id: string): Promise<void> {
     const usuario = await this.findOne(id);
     await this.usuarioRepository.remove(usuario);
+  }
+
+  async findByNameEmailOrRole(searchTerm: string): Promise<Usuario[]> {
+    const usuarios = await this.usuarioRepository.find({
+      where: [
+        { name: ILike(`%${searchTerm}%`) },
+        { email: ILike(`%${searchTerm}%`) },
+        { numberColaborador: ILike(`%${searchTerm}%`) },
+      ],
+    });
+
+    if (!usuarios.length) {
+      throw new NotFoundException(
+        `No se encontraron usuarios con el criterio ${searchTerm}`,
+      );
+    }
+
+    return usuarios;
   }
 }

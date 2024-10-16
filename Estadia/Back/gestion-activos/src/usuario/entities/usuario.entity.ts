@@ -23,6 +23,15 @@ export class Usuario {
   name: string;
 
   @ApiProperty({
+    example: '93207926',
+    description: 'Número de colaborador único',
+    uniqueItems: true,
+    nullable: false,
+  })
+  @Column({ type: 'varchar', length: 8, unique: true, nullable: false })
+  numberColaborador: string;
+
+  @ApiProperty({
     example: 'majestic@gmail.com',
     description: 'Correo electronico',
     uniqueItems: true,
