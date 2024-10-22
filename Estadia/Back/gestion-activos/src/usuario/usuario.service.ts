@@ -9,15 +9,45 @@ import { Usuario } from './entities/usuario.entity';
 import { ILike, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoginUsuarioDto } from './dto/login.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UsuarioService {
   constructor(
     @InjectRepository(Usuario)
     private usuarioRepository: Repository<Usuario>,
+    private jwtService: JwtService,
   ) {}
 
-  async login(loginDto: LoginUsuarioDto): Promise<Usuario> {
+  async validateUser(loginDto: LoginUsuarioDto): Promise<Usuario> {
+    const { email, password } = loginDto;
+    const usuario = await this.usuarioRepository.findOne({
+      where: { email },
+    });
+
+    if (!usuario || usuario.password !== password) {
+      throw new BadRequestException('Credenciales incorrectas');
+    }
+
+    return usuario;
+  }
+
+  async login(loginDto: LoginUsuarioDto): Promise<LoginResponseDto> {
+    const usuario = await this.validateUser(loginDto);
+    const payload = {
+      email: usuario.email,
+      sub: usuario.idUsuario,
+      roles: usuario.roles,
+    };
+
+    return {
+      access_token: this.jwtService.sign(payload),
+      usuario,
+    };
+  }
+
+  /*async login(loginDto: LoginUsuarioDto): Promise<Usuario> {
     const { email, password } = loginDto;
 
     const usuario = await this.usuarioRepository.findOne({
@@ -29,7 +59,7 @@ export class UsuarioService {
     }
 
     return usuario;
-  }
+  }*/
 
   async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {
     const usuario = this.usuarioRepository.create(createUsuarioDto);

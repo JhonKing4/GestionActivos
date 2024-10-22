@@ -106,4 +106,19 @@ export class MaterialController {
   async remove(@Param('id') id: string): Promise<void> {
     return await this.materialService.remove(id);
   }
+
+  @Get('search/:searchTerm')
+  @ApiOperation({ summary: 'Buscar Materiales' })
+  @ApiResponse({
+    status: 200,
+    description: 'Materiales encontrados con éxito',
+    type: [Material],
+  })
+  @ApiResponse({ status: 404, description: 'Materiales no encontrados' })
+  @ApiResponse({ status: 500, description: 'Ocurrió un error en el servidor' })
+  async findByNameEmailOrRole(
+    @Param('searchTerm') searchTerm: string,
+  ): Promise<Material[]> {
+    return await this.materialService.findByMaterialSearchTerm(searchTerm);
+  }
 }

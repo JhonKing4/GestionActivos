@@ -10,7 +10,7 @@ export class DepartamentoService {
   constructor(
     @InjectRepository(Departamento)
     private departamentoRepository: Repository<Departamento>,
-  ) { }
+  ) {}
 
   async create(
     createDepartamentoDto: CreateDepartamentoDto,

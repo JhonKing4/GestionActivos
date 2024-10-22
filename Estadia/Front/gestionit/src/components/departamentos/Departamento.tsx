@@ -9,6 +9,7 @@ import DeleteConfirmationModal from "../Extras/DeleteModal";
 import AddDepartamento from "./AddDepartamento";
 import EditDepartamento from "./EditDepartamento";
 import Loader from "../Extras/loading";
+import Pagination from "../Extras/pagination";
 
 interface AssignmentItem {
   idDepartamento: string;
@@ -31,6 +32,9 @@ const Departamento = () => {
   >(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 10;
+
   const fetchDepartamentos = async () => {
     try {
       const response = await axios.get("http://localhost:3001/departamentos");
@@ -41,6 +45,7 @@ const Departamento = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchDepartamentos();
   }, []);
@@ -115,8 +120,17 @@ const Departamento = () => {
     }
   };
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentDepartamentos = departamentos.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+  const totalPages = Math.ceil(departamentos.length / itemsPerPage);
+
   if (loading) return <Loader />;
   if (error) return <p>{error}</p>;
+
   return (
     <div className="app-container">
       <Side />
@@ -164,59 +178,50 @@ const Departamento = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {departamentos.length > 0 ? (
-                  departamentos.map((departamento) => (
-                    <tr key={departamento.idDepartamento}>
-                      <td>{departamento.name}</td>
-                      <td>{departamento.description}</td>
-                      <td>
-                        <div className="action-buttons">
-                          <button
-                            className="action-btn yellow"
-                            onClick={() =>
-                              handleEditClick(departamento.idDepartamento)
-                            }
-                          >
-                            <Pencil size={18} />
-                          </button>
-                          <button
-                            className="action-btn red"
-                            onClick={() =>
-                              handleDeleteClick(departamento.idDepartamento)
-                            }
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ): (
-                  <tr>
+                  {currentDepartamentos.length > 0 ? (
+                    currentDepartamentos.map((departamento) => (
+                      <tr key={departamento.idDepartamento}>
+                        <td>{departamento.name}</td>
+                        <td>{departamento.description}</td>
+                        <td>
+                          <div className="action-buttons">
+                            <button
+                              className="action-btn yellow"
+                              onClick={() =>
+                                handleEditClick(departamento.idDepartamento)
+                              }
+                            >
+                              <Pencil size={18} />
+                            </button>
+                            <button
+                              className="action-btn red"
+                              onClick={() =>
+                                handleDeleteClick(departamento.idDepartamento)
+                              }
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
                       <td colSpan={6} style={{ textAlign: "center" }}>
                         No se encontraron resultados
                       </td>
                     </tr>
-                )}
+                  )}
                 </tbody>
               </table>
             </div>
             <div className="table-footer">
-              <div className="showing-entries">
-                <span>Showing</span>
-                <select defaultValue="10">
-                  <option value="10">10</option>
-                  <option value="20">20</option>
-                  <option value="30">30</option>
-                </select>
-              </div>
-              <div className="pagination">
-                <button className="page-btn">←</button>
-                <button className="page-btn active">1</button>
-                <button className="page-btn">2</button>
-                <button className="page-btn">3</button>
-                <button className="page-btn">→</button>
-              </div>
+              <div className="showing-entries"></div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
             </div>
           </div>
         </div>
@@ -242,4 +247,5 @@ const Departamento = () => {
     </div>
   );
 };
+
 export default Departamento;

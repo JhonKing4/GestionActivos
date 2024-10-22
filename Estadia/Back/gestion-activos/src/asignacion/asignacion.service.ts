@@ -26,7 +26,7 @@ export class AsignacionService {
     private readonly departamentoRepository: Repository<Departamento>,
     @InjectRepository(Hotel)
     private readonly hotelRepository: Repository<Hotel>,
-  ) {}
+  ) { }
 
   async create(createAsignacionDto: CreateAsignacionDto): Promise<Asignacion> {
     const { materialId, usuarioId, departamentoId, hotelId, ...restoDatos } =
@@ -184,5 +184,74 @@ export class AsignacionService {
     });
 
     await this.asignacionRepository.remove(asignacion);
+  }
+
+  async findByAssignmentSearchTerm(searchTerm: string): Promise<Asignacion[]> {
+    const queryBuilder =
+      this.asignacionRepository.createQueryBuilder('asignacion');
+
+    queryBuilder
+      .leftJoinAndSelect('asignacion.material', 'material')
+      .leftJoinAndSelect('asignacion.usuario', 'usuario')
+      .leftJoinAndSelect('asignacion.departamento', 'departamento')
+      .leftJoinAndSelect('asignacion.hotel', 'hotel');
+
+    const isUUID = searchTerm.match(
+      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+    );
+    if (isUUID) {
+      queryBuilder.where('asignacion.idAsignacion = :searchTerm', {
+        searchTerm,
+      });
+    } else {
+      queryBuilder.where('asignacion.observation ILIKE :searchTerm', {
+        searchTerm: `%${searchTerm}%`,
+      });
+
+      const isDate = !isNaN(Date.parse(searchTerm));
+      if (isDate) {
+        queryBuilder.orWhere(
+          'CAST(asignacion.assignmentDate AS TEXT) = :searchTerm',
+          { searchTerm },
+        );
+        queryBuilder.orWhere(
+          'CAST(asignacion.returnDate AS TEXT) = :searchTerm',
+          { searchTerm },
+        );
+      }
+
+      const isNumber = !isNaN(Number(searchTerm));
+      if (isNumber) {
+        queryBuilder.orWhere('asignacion.statusAsig = :searchTerm', {
+          searchTerm: Number(searchTerm),
+        });
+      }
+
+      queryBuilder.orWhere('material.name ILIKE :searchTerm', {
+        searchTerm: `%${searchTerm}%`,
+      });
+
+      queryBuilder.orWhere('usuario.name ILIKE :searchTerm', {
+        searchTerm: `%${searchTerm}%`,
+      });
+
+      queryBuilder.orWhere('departamento.name ILIKE :searchTerm', {
+        searchTerm: `%${searchTerm}%`,
+      });
+
+      queryBuilder.orWhere('hotel.name ILIKE :searchTerm', {
+        searchTerm: `%${searchTerm}%`,
+      });
+    }
+
+    const asignaciones = await queryBuilder.getMany();
+
+    if (!asignaciones.length) {
+      throw new NotFoundException(
+        `No se encontraron asignaciones con el criterio ${searchTerm}`,
+      );
+    }
+
+    return asignaciones;
   }
 }

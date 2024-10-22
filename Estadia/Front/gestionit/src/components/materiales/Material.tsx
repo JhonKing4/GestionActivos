@@ -6,6 +6,9 @@ import AddMaterialModal from "./AddMaterialModal";
 import DeleteModal from "../Extras/DeleteModal";
 import EditMaterialModal from "./EditMaterial";
 import "../../styles/Tabla.css";
+import Loader from "../Extras/loading";
+import axios from "axios";
+import Pagination from "../Extras/PaginationMaterial";
 
 interface Hotel {
   idHotel: string;
@@ -54,6 +57,8 @@ interface MaterialRelation {
 
 const Material: React.FC = () => {
   const [materials, setMaterials] = useState<MaterialItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [relations, setRelations] = useState<MaterialRelation[]>([]);
   const [processedMaterials, setProcessedMaterials] = useState<MaterialItem[]>(
     []
@@ -67,6 +72,12 @@ const Material: React.FC = () => {
   const [selectedSubMaterials, setSelectedSubMaterials] = useState<
     MaterialItem[]
   >([]);
+  const [currentMateriales, setCurrentMateriales] = useState<MaterialItem[]>(
+    []
+  );
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 10;
 
   const handleEditMaterial = (material: MaterialItem) => {
     const relatedRelation = relations.find(
@@ -78,6 +89,16 @@ const Material: React.FC = () => {
     );
     setIsEditModalOpen(true);
   };
+
+  useEffect(() => {
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = processedMaterials.slice(
+      indexOfFirstItem,
+      indexOfLastItem
+    );
+    setCurrentMateriales(currentItems);
+  }, [currentPage, processedMaterials, itemsPerPage]);
   const fetchData = async () => {
     try {
       const [materialsResponse, relationsResponse] = await Promise.all([
@@ -90,17 +111,19 @@ const Material: React.FC = () => {
 
       const processedMaterials = Array.isArray(materialsData)
         ? materialsData
-        : [materialsData].filter(Boolean);
+        : [];
       setMaterials(processedMaterials);
 
       const processedRelations = Array.isArray(relationsData)
         ? relationsData
-        : [relationsData].filter(Boolean);
+        : [];
       setRelations(processedRelations);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
       setMaterials([]);
       setRelations([]);
+      setLoading(false);
     }
   };
 
@@ -203,6 +226,42 @@ const Material: React.FC = () => {
     setIsDeleteModalOpen(false);
   };
 
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      fetchData();
+    }
+  }, [searchTerm]);
+
+  const handleSearch = async () => {
+    if (searchTerm.trim() === "") {
+      fetchData();
+      return;
+    }
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/material/search/${searchTerm}`
+      );
+      if (response.status === 200 && Array.isArray(response.data)) {
+        if (response.data.length > 0) {
+          setMaterials(response.data);
+        } else {
+          setMaterials([]);
+        }
+      }
+    } catch (err: any) {
+      if (err.response && err.response.status === 404) {
+        setMaterials([]);
+      } else {
+        setError("Error fetching search results");
+      }
+    }
+  };
+
+  const totalPages = Math.ceil(processedMaterials.length / itemsPerPage);
+
+  if (loading) return <Loader />;
+  if (error) return <p>{error}</p>;
+
   return (
     <div className="app-container">
       <Side />
@@ -212,6 +271,30 @@ const Material: React.FC = () => {
           <div className="table-section">
             <div className="section-header">
               <h2>Materiales</h2>
+              <div className="search-group">
+                <svg
+                  className="search-icon"
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                >
+                  <g>
+                    <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path>
+                  </g>
+                </svg>
+                <input
+                  placeholder="Search"
+                  type="search"
+                  className="search-input"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <button className="searchs-button" onClick={handleSearch}>
+                  Buscar
+                </button>
+              </div>
+              <button className="action-btn">
+                Descargar <Download size={18} />
+              </button>
               <button
                 className="add-button"
                 onClick={() => setIsModalOpen(true)}
@@ -240,78 +323,76 @@ const Material: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {processedMaterials.map((item, index) => (
-                    <tr
-                      key={index}
-                      className={
-                        item.depth && item.depth > 0
-                          ? "child-row"
-                          : "parent-row"
-                      }
-                    >
-                      <td>{item.hierarchyNumber}</td>
-                      <td
+                  {currentMateriales.length > 0 ? (
+                    currentMateriales.map((item, index) => (
+                      <tr
+                        key={index}
                         className={
-                          item.depth && item.depth > 0 ? "indented-cell" : ""
+                          item.depth && item.depth > 0
+                            ? "child-row"
+                            : "parent-row"
                         }
-                        style={{ paddingLeft: `${(item.depth || 0) * 20}px` }}
                       >
-                        {item.name}
-                      </td>
-                      <td>{item.model}</td>
-                      <td>{item.serial_number}</td>
-                      <td>{item.stock}</td>
-                      <td>{item.expiration_date}</td>
-                      <td>{item.purchase_date}</td>
-                      <td>{item.description}</td>
-                      <td>{item.elementsType}</td>
-                      <td>{item.status}</td>
-                      <td>{item.hotel.name}</td>
-                      <td>{item.proveedor.name}</td>
-                      <td>{item.departamento.name}</td>
-                      <td>
-                        <div className="action-buttons">
-                          <button className="action-btn">
-                            <Download size={18} />
-                          </button>
-                          <button
-                            className="action-btn yellow"
-                            onClick={() => handleEditMaterial(item)}
-                          >
-                            <Pencil size={18} />
-                          </button>
-                          <button
-                            className="action-btn red"
-                            onClick={() => {
-                              setSelectedMaterial(item);
-                              setIsDeleteModalOpen(true);
-                            }}
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
+                        <td>{item.hierarchyNumber}</td>
+                        <td
+                          className={
+                            item.depth && item.depth > 0 ? "indented-cell" : ""
+                          }
+                          style={{ paddingLeft: `${(item.depth || 0) * 20}px` }}
+                        >
+                          {item.name}
+                        </td>
+                        <td>{item.model}</td>
+                        <td>{item.serial_number}</td>
+                        <td>{item.stock}</td>
+                        <td>{item.expiration_date}</td>
+                        <td>{item.purchase_date}</td>
+                        <td>{item.description}</td>
+                        <td>{item.elementsType}</td>
+                        <td>{item.status}</td>
+                        <td>{item.hotel.name}</td>
+                        <td>{item.proveedor.name}</td>
+                        <td>{item.departamento.name}</td>
+                        <td>
+                          <div className="action-buttons">
+                            <button
+                              className="action-btn yellow"
+                              onClick={() => handleEditMaterial(item)}
+                            >
+                              <Pencil size={18} />
+                            </button>
+                            <button
+                              className="action-btn red"
+                              onClick={() => {
+                                setSelectedMaterial(item);
+                                setIsDeleteModalOpen(true);
+                              }}
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} style={{ textAlign: "center" }}>
+                        No se encontraron resultados
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
             <div className="table-footer">
-              <div className="showing-entries">
-                <span>Showing</span>
-                <select defaultValue="10">
-                  <option value="10">10</option>
-                  <option value="20">20</option>
-                  <option value="30">30</option>
-                </select>
-              </div>
-              <div className="pagination">
-                <button className="page-btn">←</button>
-                <button className="page-btn active">1</button>
-                <button className="page-btn">2</button>
-                <button className="page-btn">3</button>
-                <button className="page-btn">→</button>
-              </div>
+              <div className="showing-entries"></div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={(page) => setCurrentPage(page)}
+                itemsPerPage={itemsPerPage}
+                totalItems={processedMaterials.length}
+              />
             </div>
           </div>
         </div>

@@ -8,6 +8,7 @@ import DeleteConfirmationModal from "../Extras/DeleteModal";
 import AddUser from "./AddUser";
 import EditUser from "./EditUser";
 import Loader from "../Extras/loading";
+import Pagination from "../Extras/pagination";
 
 interface AssignmentItem {
   idUsuario: string;
@@ -29,10 +30,19 @@ const Usuario = () => {
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const fetchUsers = async () => {
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [usersPerPage, setUsersPerPage] = useState<number>(10);
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+  const totalPages = Math.ceil(users.length / usersPerPage);
+
+  const fetchUsers = async (term: string = "") => {
     try {
-      const response = await axios.get("http://localhost:3001/usuario");
-      setUsers(response.data);
+      const response = term
+        ? await axios.get(`http://localhost:3001/usuario/search/${term}`)
+        : await axios.get("http://localhost:3001/usuario");
+      setUsers(response.data || []);
       setLoading(false);
     } catch (err) {
       setError("Error fetching users");
@@ -43,6 +53,10 @@ const Usuario = () => {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const handleDeleteClick = (id: string) => {
     setSelectedUser(id);
@@ -73,28 +87,7 @@ const Usuario = () => {
   }, [searchTerm]);
 
   const handleSearch = async () => {
-    if (searchTerm.trim() === "") {
-      fetchUsers();
-      return;
-    }
-    try {
-      const response = await axios.get(
-        `http://localhost:3001/usuario/search/${searchTerm}`
-      );
-      if (response.status === 200 && Array.isArray(response.data)) {
-        if (response.data.length > 0) {
-          setUsers(response.data);
-        } else {
-          setUsers([]);
-        }
-      }
-    } catch (err: any) {
-      if (err.response && err.response.status === 200) {
-        setUsers([]);
-      } else {
-        setError("Error fetching search results");
-      }
-    }
+    fetchUsers(searchTerm);
   };
 
   const handleEditClick = (idUsuario: string) => {
@@ -160,8 +153,8 @@ const Usuario = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.length > 0 ? (
-                    users.map((user) => (
+                  {currentUsers.length > 0 ? (
+                    currentUsers.map((user) => (
                       <tr key={user.idUsuario}>
                         <td>{user.name}</td>
                         <td>{user.email}</td>
@@ -195,22 +188,15 @@ const Usuario = () => {
                   )}
                 </tbody>
               </table>
-            </div>
-            <div className="table-footer">
-              <div className="showing-entries">
-                <span>Showing</span>
-                <select defaultValue="10">
-                  <option value="10">10</option>
-                  <option value="20">20</option>
-                  <option value="30">30</option>
-                </select>
-              </div>
-              <div className="pagination">
-                <button className="page-btn">←</button>
-                <button className="page-btn active">1</button>
-                <button className="page-btn">2</button>
-                <button className="page-btn">3</button>
-                <button className="page-btn">→</button>
+              <div className="table-footer">
+                <div className="showing-entries"></div>
+                <div className="pagination">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                  />
+                </div>
               </div>
             </div>
           </div>

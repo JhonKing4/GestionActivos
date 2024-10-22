@@ -8,6 +8,7 @@ import DeleteConfirmationModal from "../Extras/DeleteModal";
 import AddHotel from "./AddHotel";
 import EditHotel from "./EditHotel";
 import Loader from "../Extras/loading";
+import Pagination from "../Extras/pagination";
 
 interface AssignmentItem {
   idHotel: string;
@@ -24,6 +25,9 @@ const Hotel = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [editingHotelId, setEditingHotelId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
+
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 10;
 
   const fetchHotels = async () => {
     try {
@@ -103,6 +107,11 @@ const Hotel = () => {
     }
   };
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentHotels = hotels.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(hotels.length / itemsPerPage);
+
   if (loading) return <Loader />;
   if (error) return <p>{error}</p>;
 
@@ -152,8 +161,8 @@ const Hotel = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {hotels.length > 0 ? (
-                    hotels.map((hotel) => (
+                  {currentHotels.length > 0 ? (
+                    currentHotels.map((hotel) => (
                       <tr key={hotel.idHotel}>
                         <td>{hotel.name}</td>
                         <td>
@@ -185,21 +194,12 @@ const Hotel = () => {
               </table>
             </div>
             <div className="table-footer">
-              <div className="showing-entries">
-                <span>Showing</span>
-                <select defaultValue="10">
-                  <option value="10">10</option>
-                  <option value="20">20</option>
-                  <option value="30">30</option>
-                </select>
-              </div>
-              <div className="pagination">
-                <button className="page-btn">←</button>
-                <button className="page-btn active">1</button>
-                <button className="page-btn">2</button>
-                <button className="page-btn">3</button>
-                <button className="page-btn">→</button>
-              </div>
+              <div className="showing-entries"></div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
             </div>
           </div>
         </div>

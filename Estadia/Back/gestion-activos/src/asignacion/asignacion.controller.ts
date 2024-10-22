@@ -83,4 +83,19 @@ export class AsignacionController {
   async remove(@Param('id') id: string) {
     return await this.asignacionService.remove(id);
   }
+
+  @Get('search/:searchTerm')
+  @ApiOperation({ summary: 'Buscar Asignaciones' })
+  @ApiResponse({
+    status: 200,
+    description: 'Asignaciones encontrados con éxito',
+    type: [Asignacion],
+  })
+  @ApiResponse({ status: 404, description: 'Asignaciones no encontrados' })
+  @ApiResponse({ status: 500, description: 'Ocurrió un error en el servidor' })
+  async findByNameEmailOrRole(
+    @Param('searchTerm') searchTerm: string,
+  ): Promise<Asignacion[]> {
+    return await this.asignacionService.findByAssignmentSearchTerm(searchTerm);
+  }
 }

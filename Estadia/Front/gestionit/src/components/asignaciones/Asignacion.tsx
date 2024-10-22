@@ -2,13 +2,14 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import Side from "../Extras/sidebar";
 import Header from "../Extras/header";
-import { Download, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import "../../styles/Tabla.css";
 import DeleteConfirmationModal from "../Extras/DeleteModal";
 import AddAssignment from "./AddAsignacion";
 import EditAssignment from "./EditAsignacion";
 import { PDFDownloadButton } from "../Extras/Plantilla";
-import Loader from "../Extras/loading"
+import Loader from "../Extras/loading";
+import Pagination from "../Extras/pagination";
 
 interface Material {
   idMaterial: string;
@@ -54,13 +55,10 @@ const Asignacion = () => {
   const [editingAsignacionId, setEditingAsignacionId] = useState<string | null>(
     null
   );
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(2);
-  const totalPages = Math.ceil(assignmentData.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedData = assignmentData.slice(startIndex, endIndex);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 10;
 
   const fetchAssigment = async () => {
     try {
@@ -115,12 +113,44 @@ const Asignacion = () => {
     setEditingAsignacionId(null);
   };
 
-  const handleItemsPerPageChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    setItemsPerPage(Number(e.target.value));
-    setCurrentPage(1);
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      fetchAssigment();
+    }
+  }, [searchTerm]);
+
+  const handleSearch = async () => {
+    if (searchTerm.trim() === "") {
+      fetchAssigment();
+      return;
+    }
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/asignacion/search/${searchTerm}`
+      );
+      if (response.status === 200 && Array.isArray(response.data)) {
+        if (response.data.length > 0) {
+          setAssigmentData(response.data);
+        } else {
+          setAssigmentData([]);
+        }
+      }
+    } catch (err: any) {
+      if (err.response && err.response.status === 404) {
+        setAssigmentData([]);
+      } else {
+        setError("Error fetching search results");
+      }
+    }
   };
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentAssignments = assignmentData.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+  const totalPages = Math.ceil(assignmentData.length / itemsPerPage);
 
   if (loading) return <Loader />;
   if (error) return <p>{error}</p>;
@@ -134,6 +164,27 @@ const Asignacion = () => {
           <div className="table-section">
             <div className="section-header">
               <h2>Asignación</h2>
+              <div className="search-group">
+                <svg
+                  className="search-icon"
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                >
+                  <g>
+                    <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path>
+                  </g>
+                </svg>
+                <input
+                  placeholder="Search"
+                  type="search"
+                  className="search-input"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <button className="searchs-button" onClick={handleSearch}>
+                  Buscar
+                </button>
+              </div>
               <button
                 className="add-button"
                 onClick={() => setIsAddModalOpen(true)}
@@ -157,7 +208,7 @@ const Asignacion = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedData.map((item) => (
+                  {currentAssignments.map((item) => (
                     <tr key={item.idAsignacion}>
                       <td>
                         {item.material.map((material) => (
@@ -210,37 +261,11 @@ const Asignacion = () => {
             </div>
             <div className="table-footer">
               <div className="showing-entries"></div>
-              <div className="pagination">
-                <button
-                  className="page-btn"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
-                  disabled={currentPage === 1}
-                >
-                  ←
-                </button>
-                {Array.from({ length: totalPages }, (_, index) => (
-                  <button
-                    key={index + 1}
-                    className={`page-btn ${
-                      currentPage === index + 1 ? "active" : ""
-                    }`}
-                    onClick={() => setCurrentPage(index + 1)}
-                  >
-                    {index + 1}
-                  </button>
-                ))}
-                <button
-                  className="page-btn"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                  }
-                  disabled={currentPage === totalPages}
-                >
-                  →
-                </button>
-              </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
             </div>
           </div>
         </div>

@@ -12,10 +12,16 @@ import { UsuarioModule } from './usuario/usuario.module';
 import { MaterialModule } from './material/material.module';
 import { AsignacionModule } from './asignacion/asignacion.module';
 import { RelacionElementsModule } from './relacion-elements/relacion-elements.module';
+import { JwtModule } from '@nestjs/jwt';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: process.env.JWT_EXPIRATION },
+    }),
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
@@ -35,6 +41,7 @@ import { RelacionElementsModule } from './relacion-elements/relacion-elements.mo
     MaterialModule,
     AsignacionModule,
     RelacionElementsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

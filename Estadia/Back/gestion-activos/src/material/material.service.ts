@@ -129,4 +129,88 @@ export class MaterialService {
 
     await this.materialRepository.remove(material);
   }
+
+  async findByMaterialSearchTerm(searchTerm: string): Promise<Material[]> {
+    const queryBuilder = this.materialRepository.createQueryBuilder('material');
+
+    queryBuilder
+      .leftJoinAndSelect('material.hotel', 'hotel')
+      .leftJoinAndSelect('material.proveedor', 'proveedor')
+      .leftJoinAndSelect('material.departamento', 'departamento')
+      .leftJoinAndSelect('material.asignacion', 'asignacion')
+      .leftJoinAndSelect('material.mantenimiento', 'mantenimiento');
+
+    const isUUID = searchTerm.match(
+      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+    );
+    if (isUUID) {
+      queryBuilder.where('material.idMaterial = :searchTerm', { searchTerm });
+    } else {
+      queryBuilder.where('material.name ILIKE :searchTerm', {
+        searchTerm: `%${searchTerm}%`,
+      });
+
+      queryBuilder.orWhere('material.model ILIKE :searchTerm', {
+        searchTerm: `%${searchTerm}%`,
+      });
+
+      queryBuilder.orWhere('material.serial_number ILIKE :searchTerm', {
+        searchTerm: `%${searchTerm}%`,
+      });
+
+      const isDate = !isNaN(Date.parse(searchTerm));
+      if (isDate) {
+        queryBuilder.orWhere(
+          'CAST(material.expiration_date AS TEXT) = :searchTerm',
+          { searchTerm },
+        );
+        queryBuilder.orWhere(
+          'CAST(material.purchase_date AS TEXT) = :searchTerm',
+          { searchTerm },
+        );
+      }
+
+      const isNumber = !isNaN(Number(searchTerm));
+      if (isNumber) {
+        queryBuilder.orWhere('material.stock = :searchTerm', {
+          searchTerm: Number(searchTerm),
+        });
+        queryBuilder.orWhere('material.elementsType = :searchTerm', {
+          searchTerm: Number(searchTerm),
+        });
+        queryBuilder.orWhere('material.status = :searchTerm', {
+          searchTerm: Number(searchTerm),
+        });
+        queryBuilder.orWhere('material.materialtype = :searchTerm', {
+          searchTerm: Number(searchTerm),
+        });
+      }
+
+      queryBuilder.orWhere('material.description ILIKE :searchTerm', {
+        searchTerm: `%${searchTerm}%`,
+      });
+
+      queryBuilder.orWhere('hotel.name ILIKE :searchTerm', {
+        searchTerm: `%${searchTerm}%`,
+      });
+
+      queryBuilder.orWhere('proveedor.name ILIKE :searchTerm', {
+        searchTerm: `%${searchTerm}%`,
+      });
+
+      queryBuilder.orWhere('departamento.name ILIKE :searchTerm', {
+        searchTerm: `%${searchTerm}%`,
+      });
+    }
+
+    const materiales = await queryBuilder.getMany();
+
+    if (!materiales.length) {
+      throw new NotFoundException(
+        `No se encontraron materiales con el criterio ${searchTerm}`,
+      );
+    }
+
+    return materiales;
+  }
 }

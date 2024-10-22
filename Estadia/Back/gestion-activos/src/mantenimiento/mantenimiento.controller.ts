@@ -83,4 +83,21 @@ export class MantenimientoController {
   async remove(@Param('id') id: string) {
     return await this.mantenimientoService.remove(id);
   }
+
+  @Get('search/:searchTerm')
+  @ApiOperation({
+    summary: 'Buscar Mantenimiento por descripcion, fecha o tipo',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Mantenimientos encontrados con éxito',
+    type: [Mantenimiento],
+  })
+  @ApiResponse({ status: 404, description: 'Mantenimientos no encontrados' })
+  @ApiResponse({ status: 500, description: 'Ocurrió un error en el servidor' })
+  async findByNameEmailOrRole(
+    @Param('searchTerm') searchTerm: string,
+  ): Promise<Mantenimiento[]> {
+    return await this.mantenimientoService.findByNameDescription(searchTerm);
+  }
 }

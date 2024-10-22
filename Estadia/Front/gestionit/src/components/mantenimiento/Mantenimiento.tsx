@@ -8,6 +8,7 @@ import DeleteConfirmationModal from "../Extras/DeleteModal";
 import AddMaintenance from "./AddMantenimiento";
 import EditMaintenance from "./EditMantenimiento";
 import Loader from "../Extras/loading";
+import Pagination from "../Extras/pagination";
 
 interface Material {
   idMaterial: string;
@@ -38,6 +39,10 @@ const Mantenimiento = () => {
   const [editingMantenimientoId, setEditingMantenimientoId] = useState<
     string | null
   >(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 10;
 
   const fetchMaintenance = async () => {
     try {
@@ -92,6 +97,45 @@ const Mantenimiento = () => {
     setEditingMantenimientoId(null);
   };
 
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      fetchMaintenance();
+    }
+  }, [searchTerm]);
+
+  const handleSearch = async () => {
+    if (searchTerm.trim() === "") {
+      fetchMaintenance();
+      return;
+    }
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/mantenimiento/search/${searchTerm}`
+      );
+      if (response.status === 200 && Array.isArray(response.data)) {
+        if (response.data.length > 0) {
+          setMaintenanceData(response.data);
+        } else {
+          setMaintenanceData([]);
+        }
+      }
+    } catch (err: any) {
+      if (err.response && err.response.status === 404) {
+        setMaintenanceData([]);
+      } else {
+        setError("Error fetching search results");
+      }
+    }
+  };
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentMantenimiento = maintenanceData.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+  const totalPages = Math.ceil(maintenanceData.length / itemsPerPage);
+
   if (loading) return <Loader />;
   if (error) return <p>{error}</p>;
 
@@ -104,6 +148,27 @@ const Mantenimiento = () => {
           <div className="table-section">
             <div className="section-header">
               <h2>Mantenimientos</h2>
+              <div className="search-group">
+                <svg
+                  className="search-icon"
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                >
+                  <g>
+                    <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path>
+                  </g>
+                </svg>
+                <input
+                  placeholder="Search"
+                  type="search"
+                  className="search-input"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <button className="searchs-button" onClick={handleSearch}>
+                  Buscar
+                </button>
+              </div>
               <button
                 className="add-button"
                 onClick={() => setIsAddModalOpen(true)}
@@ -125,69 +190,68 @@ const Mantenimiento = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {maintenanceData.map((item) => (
-                    <tr key={item.idMantenimiento}>
-                      <td>
-                        {item.materials.map((material) => (
-                          <p key={material.idMaterial}>{material.name}</p>
-                        ))}
-                      </td>
-                      <td>
-                        {item.materials.map((material) => (
-                          <p key={material.idMaterial}>
-                            {material.serial_number}
-                          </p>
-                        ))}
-                      </td>
-                      <td>{item.description}</td>
-                      <td>
-                        {item.typeMaintenance === 0
-                          ? "Correctivo"
-                          : "Preventivo"}
-                      </td>
-                      <td>{item.startDate}</td>
-                      <td>{item.endDate}</td>
-                      <td>
-                        <div className="action-buttons">
-                          <button
-                            className="action-btn yellow"
-                            onClick={() =>
-                              handleEditClick(item.idMantenimiento)
-                            }
-                          >
-                            <Pencil size={18} />
-                          </button>
-                          <button
-                            className="action-btn red"
-                            onClick={() =>
-                              handleDeleteClick(item.idMantenimiento)
-                            }
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
+                  {currentMantenimiento.length > 0 ? (
+                    currentMantenimiento.map((item) => (
+                      <tr key={item.idMantenimiento}>
+                        <td>
+                          {item.materials.map((material) => (
+                            <p key={material.idMaterial}>{material.name}</p>
+                          ))}
+                        </td>
+                        <td>
+                          {item.materials.map((material) => (
+                            <p key={material.idMaterial}>
+                              {material.serial_number}
+                            </p>
+                          ))}
+                        </td>
+                        <td>{item.description}</td>
+                        <td>
+                          {item.typeMaintenance === 0
+                            ? "Correctivo"
+                            : "Preventivo"}
+                        </td>
+                        <td>{item.startDate}</td>
+                        <td>{item.endDate}</td>
+                        <td>
+                          <div className="action-buttons">
+                            <button
+                              className="action-btn yellow"
+                              onClick={() =>
+                                handleEditClick(item.idMantenimiento)
+                              }
+                            >
+                              <Pencil size={18} />
+                            </button>
+                            <button
+                              className="action-btn red"
+                              onClick={() =>
+                                handleDeleteClick(item.idMantenimiento)
+                              }
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} style={{ textAlign: "center" }}>
+                        No se encontraron resultados
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
             <div className="table-footer">
-              <div className="showing-entries">
-                <span>Showing</span>
-                <select defaultValue="10">
-                  <option value="10">10</option>
-                  <option value="20">20</option>
-                  <option value="30">30</option>
-                </select>
-              </div>
-              <div className="pagination">
-                <button className="page-btn">←</button>
-                <button className="page-btn active">1</button>
-                <button className="page-btn">2</button>
-                <button className="page-btn">3</button>
-                <button className="page-btn">→</button>
-              </div>
+              <div className="showing-entries"></div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
             </div>
           </div>
         </div>
