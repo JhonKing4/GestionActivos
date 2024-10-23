@@ -10,13 +10,4 @@ export class CreateDepartamentoDto {
   @IsString()
   @IsNotEmpty()
   name: string;
-
-  @ApiProperty({
-    description: 'Una breve descripcion del área',
-    uniqueItems: false,
-    nullable: false,
-  })
-  @IsString()
-  @IsNotEmpty()
-  description: string;
 }

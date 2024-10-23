@@ -22,19 +22,26 @@ const EditProveedor = ({
     rfc: "",
   });
 
+  const token = localStorage.getItem("access_token");
+
   useEffect(() => {
     const fetchProveedorData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/proveedores/${idProveedor}`
+          `http://localhost:3001/proveedores/${idProveedor}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         setFormData({
-            name: response.data.name,
-            phone: response.data.phone,
-            address: response.data.address,
-            email: response.data.email,
-            rfc: response.data.rfc
-        })
+          name: response.data.name,
+          phone: response.data.phone,
+          address: response.data.address,
+          email: response.data.email,
+          rfc: response.data.rfc,
+        });
       } catch (error) {
         console.error("Error al obtenr los datps del proveedor: ", error);
       }
@@ -69,7 +76,12 @@ const EditProveedor = ({
     try {
       await axios.patch(
         `http://localhost:3001/proveedores/${idProveedor}`,
-        updatedData
+        updatedData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       onProveedorUpdated();
       onClose();
@@ -138,7 +150,7 @@ const EditProveedor = ({
               value={formData.email}
               onChange={handleInputChange}
               required
-              title="Debe ingresar un correo electrónico válido" // Validación para el email
+              title="Debe ingresar un correo electrónico válido"
             />
           </div>
 

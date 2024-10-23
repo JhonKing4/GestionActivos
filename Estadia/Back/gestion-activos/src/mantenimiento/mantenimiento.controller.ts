@@ -6,12 +6,22 @@ import {
   Param,
   Patch,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { MantenimientoService } from './mantenimiento.service';
 import { CreateMantenimientoDto } from './dto/create-mantenimiento.dto';
 import { UpdateMantenimientoDto } from './dto/update-mantenimiento.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Mantenimiento } from './entities/mantenimiento.entity';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { RequireRoles } from 'src/decorators/roles.decorator';
+import { Roles } from 'src/usuario/enums/roles.enum';
 
 @ApiTags('Mantenimientos')
 @Controller('mantenimiento')
@@ -19,6 +29,9 @@ export class MantenimientoController {
   constructor(private readonly mantenimientoService: MantenimientoService) {}
 
   @Post()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Crear un nuevo mantenimiento' })
   @ApiResponse({
     status: 201,
@@ -32,6 +45,8 @@ export class MantenimientoController {
   }
 
   @Get()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Obtener todos los mantenimientos' })
   @ApiResponse({
     status: 200,
@@ -44,6 +59,9 @@ export class MantenimientoController {
   }
 
   @Get(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Obtener un mantenimiento por ID' })
   @ApiResponse({
     status: 200,
@@ -57,6 +75,9 @@ export class MantenimientoController {
   }
 
   @Patch(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Actualizar un mantenimiento por ID' })
   @ApiResponse({
     status: 200,
@@ -73,6 +94,9 @@ export class MantenimientoController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN)
   @ApiOperation({ summary: 'Eliminar un mantenimiento por ID' })
   @ApiResponse({
     status: 200,
@@ -85,6 +109,9 @@ export class MantenimientoController {
   }
 
   @Get('search/:searchTerm')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({
     summary: 'Buscar Mantenimiento por descripcion, fecha o tipo',
   })

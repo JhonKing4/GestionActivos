@@ -22,6 +22,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
   const [departamentos, setDepartamentos] = useState<any[]>([]);
   const [hoteles, setHoteles] = useState<any[]>([]);
   const [allRelations, setAllRelations] = useState<any[]>([]);
+  const token = localStorage.getItem("access_token");
 
   useEffect(() => {
     if (material && isOpen) {
@@ -44,11 +45,31 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
         departamentosRes,
         hotelesRes,
       ] = await Promise.all([
-        axios.get("http://localhost:3001/material"),
-        axios.get("http://localhost:3001/relacion-elements"),
-        axios.get("http://localhost:3001/proveedores"),
-        axios.get("http://localhost:3001/departamentos"),
-        axios.get("http://localhost:3001/hoteles"),
+        axios.get("http://localhost:3001/material", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+        axios.get("http://localhost:3001/relacion-elements", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+        axios.get("http://localhost:3001/proveedores", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+        axios.get("http://localhost:3001/departamentos", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+        axios.get("http://localhost:3001/hoteles", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }),
       ]);
 
       const allMaterials = materialsRes.data;
@@ -140,7 +161,12 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
     try {
       const responseMaterial = await axios.patch(
         `http://localhost:3001/material/${updatedMaterial.idMaterial}`,
-        updatedMaterialData
+        updatedMaterialData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const newMaterial = responseMaterial.data;
 
@@ -161,12 +187,22 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
         ) {
           await axios.patch(
             `http://localhost:3001/relacion-elements/${existingRelation.idRelacionElement}`,
-            relacionData
+            relacionData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
           );
         } else {
           await axios.post(
             `http://localhost:3001/relacion-elements`,
-            relacionData
+            relacionData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
           );
           console.log(
             "Nueva relación creada debido a un ID inválido o relación no existente."
@@ -175,7 +211,12 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
       } else {
         await axios.post(
           `http://localhost:3001/relacion-elements`,
-          relacionData
+          relacionData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         console.log("Nueva relación creada.");
       }

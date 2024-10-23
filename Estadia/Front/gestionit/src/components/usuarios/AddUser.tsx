@@ -14,8 +14,10 @@ const AddUser = ({ isOpen, onClose, onUserAdded }: AddUserProps) => {
     email: "",
     password: "",
     numberColaborador: "",
+    companyname: "",
     roles: 1,
   });
+  const token = localStorage.getItem("access_token");
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -30,7 +32,11 @@ const AddUser = ({ isOpen, onClose, onUserAdded }: AddUserProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:3001/usuario", formData);
+      await axios.post("http://localhost:3001/usuario", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       onUserAdded();
       setFormData((prev) => ({
         ...prev,
@@ -38,7 +44,7 @@ const AddUser = ({ isOpen, onClose, onUserAdded }: AddUserProps) => {
         email: "",
         password: "",
         numberColaborador: "",
-
+        companyname: "",
       }));
       onClose();
     } catch (error) {
@@ -83,13 +89,18 @@ const AddUser = ({ isOpen, onClose, onUserAdded }: AddUserProps) => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="numberColaborador">Numero de colaborador</label>
+            <label htmlFor="numberColaborador">Número de colaborador</label>
             <input
-              type="number"
+              type="text"
               id="numberColaborador"
               name="numberColaborador"
               value={formData.numberColaborador}
-              onChange={handleInputChange}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^\d{0,8}$/.test(value)) {
+                  handleInputChange(e);
+                }
+              }}
               required
             />
           </div>
@@ -101,6 +112,18 @@ const AddUser = ({ isOpen, onClose, onUserAdded }: AddUserProps) => {
               id="password"
               name="password"
               value={formData.password}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="name">Nombre de la empresa</label>
+            <input
+              type="text"
+              id="companyname"
+              name="companyname"
+              value={formData.companyname}
               onChange={handleInputChange}
               required
             />

@@ -9,6 +9,7 @@ import AddUser from "./AddUser";
 import EditUser from "./EditUser";
 import Loader from "../Extras/loading";
 import Pagination from "../Extras/pagination";
+import ErrorModal from "../Extras/ErrorModal";
 
 interface AssignmentItem {
   idUsuario: string;
@@ -17,6 +18,7 @@ interface AssignmentItem {
   password: string;
   numberColaborador: string;
   roles: number;
+  companyname: string;
 }
 
 const Usuario = () => {
@@ -29,25 +31,40 @@ const Usuario = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
-
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState<boolean>(false); //modal error
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [usersPerPage, setUsersPerPage] = useState<number>(10);
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
   const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
   const totalPages = Math.ceil(users.length / usersPerPage);
+  const token = localStorage.getItem("access_token");
 
   const fetchUsers = async (term: string = "") => {
     try {
       const response = term
-        ? await axios.get(`http://localhost:3001/usuario/search/${term}`)
-        : await axios.get("http://localhost:3001/usuario");
+        ? await axios.get(`http://localhost:3001/usuario/search/${term}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+        : await axios.get("http://localhost:3001/usuario", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
       setUsers(response.data || []);
       setLoading(false);
     } catch (err) {
       setError("Error fetching users");
+      setIsErrorModalOpen(true);
       setLoading(false);
     }
+  };
+
+  const handleErrorModalClose = () => {
+    setIsErrorModalOpen(false);
+    setError(null);
   };
 
   useEffect(() => {
@@ -66,7 +83,11 @@ const Usuario = () => {
   const handleDeleteConfirm = async () => {
     if (selectedUser) {
       try {
-        await axios.delete(`http://localhost:3001/usuario/${selectedUser}`);
+        await axios.delete(`http://localhost:3001/usuario/${selectedUser}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setUsers(users.filter((user) => user.idUsuario !== selectedUser));
         setIsModalOpen(false);
       } catch (error) {
@@ -101,13 +122,12 @@ const Usuario = () => {
   };
 
   if (loading) return <Loader />;
-  if (error) return <p>{error}</p>;
 
   return (
     <div className="app-container">
       <Side />
       <div className="main-content">
-        <Header userName="Jhoandi" />
+        <Header />
         <div className="tabla-content">
           <div className="table-section">
             <div className="section-header">
@@ -149,6 +169,7 @@ const Usuario = () => {
                     <th>Numero de Colaborador</th>
                     <th>Contraseña</th>
                     <th>Rol</th>
+                    <th>Nombre de la empresa</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -161,6 +182,7 @@ const Usuario = () => {
                         <td>{user.numberColaborador}</td>
                         <td>{user.password}</td>
                         <td>{user.roles === 0 ? "Admin" : "Colaborador"}</td>
+                        <td>{user.companyname}</td>
                         <td>
                           <div className="action-buttons">
                             <button
@@ -200,6 +222,11 @@ const Usuario = () => {
               </div>
             </div>
           </div>
+          <ErrorModal
+            isOpen={isErrorModalOpen}
+            message={error}
+            onClose={handleErrorModalClose}
+          />
         </div>
       </div>
       <DeleteConfirmationModal

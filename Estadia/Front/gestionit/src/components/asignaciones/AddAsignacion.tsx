@@ -30,14 +30,25 @@ const AddAssignment = ({
   const [departments, setDepartments] = useState<any[]>([]);
   const [hotels, setHotels] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem("access_token");
 
   const fetchMaterialsAndAssignments = async () => {
     try {
       const materialResponse = await axios.get(
-        "http://localhost:3001/material"
+        "http://localhost:3001/material",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const assignmentResponse = await axios.get(
-        "http://localhost:3001/asignacion"
+        "http://localhost:3001/asignacion",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       const allMaterials = materialResponse.data;
@@ -58,11 +69,24 @@ const AddAssignment = ({
 
   const fetchAdditionalData = async () => {
     try {
-      const userResponse = await axios.get("http://localhost:3001/usuario");
+      const userResponse = await axios.get("http://localhost:3001/usuario", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const departmentResponse = await axios.get(
-        "http://localhost:3001/departamentos"
+        "http://localhost:3001/departamentos",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-      const hotelResponse = await axios.get("http://localhost:3001/hoteles");
+      const hotelResponse = await axios.get("http://localhost:3001/hoteles", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       setUsers(userResponse.data);
       setDepartments(departmentResponse.data);
@@ -119,7 +143,11 @@ const AddAssignment = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:3001/asignacion", formData);
+      await axios.post("http://localhost:3001/asignacion", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       onAssignmentAdded();
       resetForm();
       onClose();

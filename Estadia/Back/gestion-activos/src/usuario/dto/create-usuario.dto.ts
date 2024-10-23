@@ -59,4 +59,13 @@ export class CreateUsuarioDto {
   @IsString()
   @IsNotEmpty()
   numberColaborador: string;
+
+  @ApiProperty({
+    description: 'Nombre de la empresa',
+    uniqueItems: false,
+    nullable: false,
+  })
+  @IsString()
+  @MaxLength(100)
+  companyname: string;
 }

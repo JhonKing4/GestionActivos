@@ -6,12 +6,22 @@ import {
   Param,
   Patch,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { AsignacionService } from './asignacion.service';
 import { CreateAsignacionDto } from './dto/create-asignacion.dto';
 import { UpdateAsignacionDto } from './dto/update-asignacion.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Asignacion } from './entities/asignacion.entity';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { RequireRoles } from 'src/decorators/roles.decorator';
+import { Roles } from 'src/usuario/enums/roles.enum';
 
 @ApiTags('Asignaciones')
 @Controller('asignacion')
@@ -19,6 +29,9 @@ export class AsignacionController {
   constructor(private readonly asignacionService: AsignacionService) {}
 
   @Post()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Crear una nueva asignación' })
   @ApiResponse({
     status: 201,
@@ -32,6 +45,8 @@ export class AsignacionController {
   }
 
   @Get()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Obtener todas las asignaciones' })
   @ApiResponse({
     status: 200,
@@ -44,6 +59,9 @@ export class AsignacionController {
   }
 
   @Get(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Obtener una asignación por ID' })
   @ApiResponse({
     status: 200,
@@ -57,6 +75,9 @@ export class AsignacionController {
   }
 
   @Patch(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Actualizar una asignación por ID' })
   @ApiResponse({
     status: 200,
@@ -73,6 +94,9 @@ export class AsignacionController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN)
   @ApiOperation({ summary: 'Eliminar una asignación por ID' })
   @ApiResponse({
     status: 200,
@@ -85,6 +109,9 @@ export class AsignacionController {
   }
 
   @Get('search/:searchTerm')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Buscar Asignaciones' })
   @ApiResponse({
     status: 200,

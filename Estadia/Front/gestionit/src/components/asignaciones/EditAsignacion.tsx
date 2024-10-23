@@ -32,11 +32,17 @@ const EditAssignment = ({
   const [departments, setDepartments] = useState<any[]>([]);
   const [hotels, setHotels] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem("access_token");
 
   const fetchAssignment = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3001/asignacion/${assignmentId}`
+        `http://localhost:3001/asignacion/${assignmentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const assignmentData = response.data;
 
@@ -58,22 +64,37 @@ const EditAssignment = ({
   const fetchMaterialsAndAssignments = async () => {
     try {
       const materialResponse = await axios.get(
-        "http://localhost:3001/material"
+        "http://localhost:3001/material",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const assignmentsResponse = await axios.get(
-        "http://localhost:3001/asignacion"
+        "http://localhost:3001/asignacion",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       const allMaterials = materialResponse.data;
 
       const assignedMaterialsInOtherAssignments = assignmentsResponse.data
-        .filter((assignment: any) => assignment.idAsignacion !== assignmentId) // Excluimos la asignación actual
+        .filter((assignment: any) => assignment.idAsignacion !== assignmentId)
         .flatMap((assignment: any) =>
           assignment.material.map((m: any) => m.idMaterial)
         );
 
       const assignmentResponse = await axios.get(
-        `http://localhost:3001/asignacion/${assignmentId}`
+        `http://localhost:3001/asignacion/${assignmentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const assignedMaterials = assignmentResponse.data.material.map(
         (m: any) => m.idMaterial
@@ -101,11 +122,19 @@ const EditAssignment = ({
 
   const fetchAdditionalData = async () => {
     try {
-      const userResponse = await axios.get("http://localhost:3001/usuario");
+      const userResponse = await axios.get("http://localhost:3001/usuario", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const departmentResponse = await axios.get(
         "http://localhost:3001/departamentos"
       );
-      const hotelResponse = await axios.get("http://localhost:3001/hoteles");
+      const hotelResponse = await axios.get("http://localhost:3001/hoteles", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       setUsers(userResponse.data);
       setDepartments(departmentResponse.data);
@@ -155,7 +184,12 @@ const EditAssignment = ({
     try {
       await axios.patch(
         `http://localhost:3001/asignacion/${assignmentId}`,
-        formData
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       await fetchMaterialsAndAssignments();

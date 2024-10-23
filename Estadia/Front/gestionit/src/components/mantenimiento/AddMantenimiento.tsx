@@ -28,14 +28,25 @@ const AddMaintenance = ({
 
   const [materials, setMaterials] = useState<any[]>([]);
   const [availableMaterials, setAvailableMaterials] = useState<any[]>([]);
+  const token = localStorage.getItem("access_token");
 
   const fetchMaterials = async () => {
     try {
       const materialResponse = await axios.get(
-        "http://localhost:3001/material"
+        "http://localhost:3001/material",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const maintenanceResponse = await axios.get(
-        "http://localhost:3001/mantenimiento"
+        "http://localhost:3001/mantenimiento",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       const allMaterials = materialResponse.data;
@@ -82,7 +93,11 @@ const AddMaintenance = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:3001/mantenimiento", formData);
+      await axios.post("http://localhost:3001/mantenimiento", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       onMaintenanceAdded();
       setFormData({
         description: "",

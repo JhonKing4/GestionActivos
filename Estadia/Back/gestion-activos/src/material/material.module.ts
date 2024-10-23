@@ -6,10 +6,12 @@ import { Material } from './entities/material.entity';
 import { Hotel } from 'src/hotel/entities/hotel.entity';
 import { Proveedor } from 'src/proveedor/entities/proveedor.entity';
 import { Departamento } from 'src/departamento/entities/departamento.entity';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Material, Hotel, Proveedor, Departamento]),
+    AuthModule,
   ],
   controllers: [MaterialController],
   providers: [MaterialService],

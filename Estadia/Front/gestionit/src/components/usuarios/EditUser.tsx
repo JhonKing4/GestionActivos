@@ -20,20 +20,29 @@ const EditUser = ({
     email: "",
     password: "",
     numberColaborador: "",
+    companyname: "",
     roles: 1,
   });
+
+  const token = localStorage.getItem("access_token");
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/usuario/${userId}`
+          `http://localhost:3001/usuario/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         setFormData({
           name: response.data.name,
           email: response.data.email,
           password: "",
           numberColaborador: response.data.numberColaborador,
+          companyname: response.data.companyname,
           roles: response.data.roles,
         });
       } catch (error) {
@@ -63,11 +72,20 @@ const EditUser = ({
       name: formData.name,
       email: formData.email,
       numberColaborador: formData.numberColaborador,
+      companyname: formData.companyname,
       roles: formData.roles,
     };
 
     try {
-      await axios.patch(`http://localhost:3001/usuario/${userId}`, updatedData);
+      await axios.patch(
+        `http://localhost:3001/usuario/${userId}`,
+        updatedData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       onUserUpdated();
       onClose();
     } catch (error) {
@@ -112,13 +130,18 @@ const EditUser = ({
           </div>
 
           <div className="form-group">
-            <label htmlFor="numberColaborador">Numero de Colaborador</label>
+            <label htmlFor="numberColaborador">Número de Colaborador</label>
             <input
-              type="number"
+              type="text"
               id="numberColaborador"
               name="numberColaborador"
               value={formData.numberColaborador}
-              onChange={handleInputChange}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^\d{0,8}$/.test(value)) {
+                  handleInputChange(e);
+                }
+              }}
               required
             />
           </div>
@@ -132,6 +155,17 @@ const EditUser = ({
               value={formData.password}
               onChange={handleInputChange}
               placeholder="Dejar en blanco para no cambiar"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="name">Nombre de la empresa</label>
+            <input
+              type="text"
+              id="companyname"
+              name="companyname"
+              value={formData.companyname}
+              onChange={handleInputChange}
+              required
             />
           </div>
 

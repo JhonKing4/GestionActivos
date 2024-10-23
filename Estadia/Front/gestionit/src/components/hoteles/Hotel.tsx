@@ -28,10 +28,15 @@ const Hotel = () => {
 
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 10;
+  const token = localStorage.getItem("access_token");
 
   const fetchHotels = async () => {
     try {
-      const response = await axios.get("http://localhost:3001/hoteles");
+      const response = await axios.get("http://localhost:3001/hoteles", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setHotels(response.data);
       setLoading(false);
     } catch (err) {
@@ -52,7 +57,11 @@ const Hotel = () => {
   const handleDeleteConfirm = async () => {
     if (selectedHotel) {
       try {
-        await axios.delete(`http://localhost:3001/hoteles/${selectedHotel}`);
+        await axios.delete(`http://localhost:3001/hoteles/${selectedHotel}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setHotels(hotels.filter((hotel) => hotel.idHotel !== selectedHotel));
         setIsModalOpen(false);
       } catch (error) {
@@ -89,7 +98,12 @@ const Hotel = () => {
     }
     try {
       const response = await axios.get(
-        `http://localhost:3001/hoteles/name/${searchTerm}`
+        `http://localhost:3001/hoteles/name/${searchTerm}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       if (response.status === 200 && Array.isArray(response.data)) {
         if (response.data.length > 0) {
@@ -119,7 +133,7 @@ const Hotel = () => {
     <div className="app-container">
       <Side />
       <div className="main-content">
-        <Header userName="Jhoandi" />
+        <Header/>
         <div className="tabla-content">
           <div className="table-section">
             <div className="section-header">

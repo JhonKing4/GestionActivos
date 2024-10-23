@@ -13,6 +13,8 @@ import {
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import logoImage from "../../assets/images/majestic-resorts-logo.jpg";
+import { Download } from "lucide-react";
+import "../../styles/inventario.css"
 
 interface AssignmentData {
   idAsignacion: string;
@@ -31,6 +33,7 @@ interface AssignmentData {
     name: string;
     email: string;
     numberColaborador: string;
+    companyname: string;
   };
   departamento: {
     idDepartamento: string;
@@ -102,10 +105,10 @@ const PDFDocument: React.FC<{ data: AssignmentData }> = ({ data }) => (
       <View style={styles.section}>
         <Text style={styles.text}>
           <Text style={styles.boldText}>{data.usuario.name}</Text>, de col:{" "}
-          {data.usuario.numberColaborador} en mi calidad de empleado de la empresa{" "}
-          <Text style={styles.boldText}>{data.hotel.name},</Text> reconozco
-          haber recibido los siguientes equipos de la empresa en perfectas
-          condiciones, los cuales se detallan a continuación:
+          {data.usuario.numberColaborador} en mi calidad de empleado de la
+          empresa <Text style={styles.boldText}>{data.usuario.companyname},</Text>{" "}
+          reconozco haber recibido los siguientes equipos de la empresa en
+          perfectas condiciones, los cuales se detallan a continuación:
         </Text>
 
         {data.material.map((item, index) => (
@@ -169,13 +172,19 @@ const PDFDownloadButton: React.FC<{ assignmentId: string }> = ({
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const token = localStorage.getItem("access_token");
 
   const fetchAssignmentData = async () => {
     setLoading(true);
     setError(null);
     try {
       const response = await axios.get<AssignmentData>(
-        `http://localhost:3001/asignacion/${assignmentId}`
+        `http://localhost:3001/asignacion/${assignmentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       setAssignmentData(response.data);
     } catch (err) {
@@ -194,30 +203,33 @@ const PDFDownloadButton: React.FC<{ assignmentId: string }> = ({
   if (!assignmentData) return <button disabled>No hay datos</button>;
 
   return (
-    <BlobProvider document={<PDFDocument data={assignmentData} />}>
-      {({ blob, url, loading: pdfLoading, error: pdfError }) => {
-        if (pdfLoading) {
-          return <button disabled>Generando PDF...</button>;
-        }
-        if (pdfError) {
-          return <button disabled>Error al generar PDF</button>;
-        }
-        return (
-          <button
-            onClick={() => {
-              if (blob) {
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = `responsiva_${assignmentId}.pdf`;
-                link.click();
-              }
-            }}
-          >
-            Descargar PDF
-          </button>
-        );
-      }}
-    </BlobProvider>
+    <div id="unique-pdf-button">
+      <BlobProvider document={<PDFDocument data={assignmentData} />}>
+        {({ blob, url, loading: pdfLoading, error: pdfError }) => {
+          if (pdfLoading) {
+            return <button disabled>Generando PDF...</button>;
+          }
+          if (pdfError) {
+            return <button disabled>Error al generar PDF</button>;
+          }
+          return (
+            <button
+              onClick={() => {
+                if (blob) {
+                  const link = document.createElement("a");
+                  link.href = URL.createObjectURL(blob);
+                  link.download = `responsiva_${assignmentId}.pdf`;
+                  link.click();
+                }
+              }}
+            >
+              <Download size={18} />
+              Descargar
+            </button>
+          );
+        }}
+      </BlobProvider>
+    </div>
   );
 };
 

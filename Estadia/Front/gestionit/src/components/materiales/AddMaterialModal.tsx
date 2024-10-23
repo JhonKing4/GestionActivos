@@ -48,11 +48,16 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
   const [departamentos, setDepartamentos] = useState<any[]>([]);
   const [hoteles, setHoteles] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const token = localStorage.getItem("access_token");
 
   useEffect(() => {
     const fetchProveedores = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/proveedores");
+        const response = await axios.get("http://localhost:3001/proveedores", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setProveedores(response.data);
       } catch (error) {
         console.error("Error al obtener proveedores:", error);
@@ -61,7 +66,14 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
 
     const fetchDepartamentos = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/departamentos");
+        const response = await axios.get(
+          "http://localhost:3001/departamentos",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         setDepartamentos(response.data);
       } catch (error) {
         console.error("Error al obtener departamentos:", error);
@@ -70,7 +82,11 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
 
     const fetchHoteles = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/hoteles");
+        const response = await axios.get("http://localhost:3001/hoteles", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setHoteles(response.data);
       } catch (error) {
         console.error("Error al obtener hoteles:", error);
@@ -130,7 +146,12 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
     try {
       const response = await axios.post(
         "http://localhost:3001/material",
-        subMaterialData
+        subMaterialData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const newSubMaterial = response.data;
       setSubMaterialsList([...subMaterialsList, newSubMaterial]);
@@ -179,7 +200,12 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
     try {
       const responseMaterial = await axios.post(
         "http://localhost:3001/material",
-        materialData
+        materialData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const newMaterial = responseMaterial.data;
 
@@ -194,7 +220,12 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
 
         await axios.post(
           "http://localhost:3001/relacion-elements",
-          relacionData
+          relacionData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
       } else {
         console.log("No hay materiales hijos para relacionar.");

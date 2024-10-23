@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useState } from "react";
-import "../../styles/ModalAddEdit.css"
+import "../../styles/ModalAddEdit.css";
 
 interface AddHotelProps {
   isOpen: boolean;
@@ -23,10 +23,16 @@ const AddHotel = ({ isOpen, onClose, onHotelAdded }: AddHotelProps) => {
     }));
   };
 
+  const token = localStorage.getItem("access_token");
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:3001/hoteles", formData);
+      await axios.post("http://localhost:3001/hoteles", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       onHotelAdded();
       setFormData({ name: "" });
       onClose();

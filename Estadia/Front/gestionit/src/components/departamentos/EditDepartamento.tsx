@@ -17,17 +17,21 @@ const EditDepartamento = ({
 }: EditDepartamentoProps) => {
   const [formData, setFormData] = useState({
     name: "",
-    description: "",
   });
+  const token = localStorage.getItem("access_token");
   useEffect(() => {
     const fetchDepartamentoData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/departamentos/${idDepartamento}`
+          `http://localhost:3001/departamentos/${idDepartamento}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         setFormData({
           name: response.data.name,
-          description: response.data.description,
         });
       } catch (error) {
         console.error("Error fetching departamento data: ", error);
@@ -54,14 +58,17 @@ const EditDepartamento = ({
 
     const updatedData = {
       name: formData.name,
-      description:
-        formData.description.trim() === "" ? " " : formData.description,
     };
 
     try {
       await axios.patch(
         `http://localhost:3001/departamentos/${idDepartamento}`,
-        updatedData
+        updatedData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       onDepartamentoUpdated();
       onClose();
@@ -91,16 +98,6 @@ const EditDepartamento = ({
               value={formData.name}
               onChange={handleInputChange}
               required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="name">Descripción</label>
-            <input
-              type="text"
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
             />
           </div>
           <div className="button-group">

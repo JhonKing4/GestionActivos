@@ -36,10 +36,15 @@ const Proveedor = () => {
 
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 10;
+  const token = localStorage.getItem("access_token");
 
   const fecthProveedors = async () => {
     try {
-      const response = await axios.get("http://localhost:3001/proveedores");
+      const response = await axios.get("http://localhost:3001/proveedores", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setProveedors(response.data);
       setLoading(false);
     } catch (err) {
@@ -61,7 +66,12 @@ const Proveedor = () => {
     if (selectedProveedors) {
       try {
         await axios.delete(
-          `http://localhost:3001/proveedores/${selectedProveedors}`
+          `http://localhost:3001/proveedores/${selectedProveedors}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         setProveedors(
           proveedors.filter(
@@ -103,7 +113,12 @@ const Proveedor = () => {
     }
     try {
       const response = await axios.get(
-        `http://localhost:3001/proveedores/search/${searchTerm}`
+        `http://localhost:3001/proveedores/search/${searchTerm}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       if (response.status === 200 && Array.isArray(response.data)) {
         if (response.data.length > 0) {
@@ -133,7 +148,7 @@ const Proveedor = () => {
     <div className="app-container">
       <Side />
       <div className="main-content">
-        <Header userName="Jhoandi" />
+        <Header />
         <div className="tabla-content">
           <div className="table-section">
             <div className="section-header">

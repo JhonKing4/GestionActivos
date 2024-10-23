@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Download, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import Header from "../Extras/header";
 import Side from "../Extras/sidebar";
 import AddMaterialModal from "./AddMaterialModal";
@@ -9,6 +9,7 @@ import "../../styles/Tabla.css";
 import Loader from "../Extras/loading";
 import axios from "axios";
 import Pagination from "../Extras/PaginationMaterial";
+import { PDFDownloadButton } from "../Extras/PlantillaInventario";
 
 interface Hotel {
   idHotel: string;
@@ -78,6 +79,7 @@ const Material: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 10;
+  const token = localStorage.getItem("access_token");
 
   const handleEditMaterial = (material: MaterialItem) => {
     const relatedRelation = relations.find(
@@ -102,8 +104,16 @@ const Material: React.FC = () => {
   const fetchData = async () => {
     try {
       const [materialsResponse, relationsResponse] = await Promise.all([
-        fetch("http://localhost:3001/material"),
-        fetch("http://localhost:3001/relacion-elements"),
+        fetch("http://localhost:3001/material", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+        fetch("http://localhost:3001/relacion-elements", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }),
       ]);
 
       const materialsData = await materialsResponse.json();
@@ -208,6 +218,9 @@ const Material: React.FC = () => {
         `http://localhost:3001/relacion-elements/${materialId}`,
         {
           method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
@@ -239,7 +252,12 @@ const Material: React.FC = () => {
     }
     try {
       const response = await axios.get(
-        `http://localhost:3001/material/search/${searchTerm}`
+        `http://localhost:3001/material/search/${searchTerm}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       if (response.status === 200 && Array.isArray(response.data)) {
         if (response.data.length > 0) {
@@ -266,7 +284,7 @@ const Material: React.FC = () => {
     <div className="app-container">
       <Side />
       <div className="main-content">
-        <Header userName="Jhoandi" />
+        <Header />
         <div className="tabla-content">
           <div className="table-section">
             <div className="section-header">
@@ -292,9 +310,7 @@ const Material: React.FC = () => {
                   Buscar
                 </button>
               </div>
-              <button className="action-btn">
-                Descargar <Download size={18} />
-              </button>
+              <PDFDownloadButton />
               <button
                 className="add-button"
                 onClick={() => setIsModalOpen(true)}
@@ -348,8 +364,30 @@ const Material: React.FC = () => {
                         <td>{item.expiration_date}</td>
                         <td>{item.purchase_date}</td>
                         <td>{item.description}</td>
-                        <td>{item.elementsType}</td>
-                        <td>{item.status}</td>
+                        <td>
+                          {(() => {
+                            switch (item.elementsType) {
+                              case 0:
+                                return "Software";
+                              case 1:
+                                return "Hardware";
+                              default:
+                                return "Desconocido";
+                            }
+                          })()}
+                        </td>
+                        <td>
+                          {(() => {
+                            switch (item.status) {
+                              case 0:
+                                return "Inactivo";
+                              case 1:
+                                return "Activo";
+                              default:
+                                return "Desconocido";
+                            }
+                          })()}
+                        </td>
                         <td>{item.hotel.name}</td>
                         <td>{item.proveedor.name}</td>
                         <td>{item.departamento.name}</td>

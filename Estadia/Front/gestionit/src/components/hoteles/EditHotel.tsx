@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import "../../styles/ModalAddEdit.css"
+import "../../styles/ModalAddEdit.css";
 
 interface EditHotelProps {
   isOpen: boolean;
@@ -18,12 +18,19 @@ const EditHotel = ({
   const [formData, setFormData] = useState({
     name: "",
   });
-  
+
+  const token = localStorage.getItem("access_token");
+
   useEffect(() => {
     const fetcHotelData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/hoteles/${idHotel}`
+          `http://localhost:3001/hoteles/${idHotel}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         setFormData({
           name: response.data.name,
@@ -47,7 +54,7 @@ const EditHotel = ({
       [name]: value,
     }));
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -58,7 +65,12 @@ const EditHotel = ({
     try {
       await axios.patch(
         `http://localhost:3001/hoteles/${idHotel}`,
-        updatedData
+        updatedData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       onHotelUpdated();
       onClose();

@@ -6,11 +6,21 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { HotelService } from './hotel.service';
 import { CreateHotelDto } from './dto/create-hotel.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Hotel } from './entities/hotel.entity';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { RequireRoles } from 'src/decorators/roles.decorator';
+import { Roles } from 'src/usuario/enums/roles.enum';
 
 @ApiTags('Hoteles')
 @Controller('hoteles')
@@ -18,6 +28,9 @@ export class HotelController {
   constructor(private readonly hotelService: HotelService) {}
 
   @Post()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Crear un nuevo Hotel ' })
   @ApiResponse({
     status: 201,
@@ -34,6 +47,8 @@ export class HotelController {
   }
 
   @Get()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Obtener todos los hoteles' })
   @ApiResponse({
     status: 200,
@@ -46,6 +61,9 @@ export class HotelController {
   }
 
   @Get(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: ' Obtener un hotel por ID' })
   @ApiResponse({
     status: 200,
@@ -57,7 +75,11 @@ export class HotelController {
   findOne(@Param('id') id: string): Promise<Hotel> {
     return this.hotelService.findOne(id);
   }
+
   @Patch(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Actualizar un Hotel por ID' })
   @ApiResponse({
     status: 200,
@@ -77,6 +99,9 @@ export class HotelController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN)
   @ApiOperation({ summary: 'Eliminar un Hotel por ID' })
   @ApiResponse({
     status: 200,
@@ -92,6 +117,9 @@ export class HotelController {
   }
 
   @Get('name/:name')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Buscar hoteles por nombre' })
   @ApiResponse({
     status: 200,

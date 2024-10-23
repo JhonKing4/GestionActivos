@@ -15,7 +15,6 @@ const AddDepartamento = ({
 }: AddDepartamentoProps) => {
   const [formData, setFormData] = useState({
     name: "",
-    description: "",
   });
 
   const handleInputChange = (
@@ -27,23 +26,26 @@ const AddDepartamento = ({
       [name]: value,
     }));
   };
-
+  const token = localStorage.getItem("access_token");
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const formDataWithDefaults = {
       ...formData,
-      description:
-        formData.description.trim() === "" ? " " : formData.description,
     };
 
     try {
       await axios.post(
         "http://localhost:3001/departamentos",
-        formDataWithDefaults
+        formDataWithDefaults,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       onDepartamentoAdded();
-      setFormData({ name: "", description: "" });
+      setFormData({ name: "" });
       onClose();
     } catch (error) {
       console.error("Error al agregar el departamento: ", error);
@@ -71,16 +73,6 @@ const AddDepartamento = ({
               value={formData.name}
               onChange={handleInputChange}
               required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="description">Descripción</label>
-            <input
-              type="text"
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
             />
           </div>
           <div className="button-group">

@@ -20,13 +20,4 @@ export class Departamento {
   })
   @Column({ type: 'varchar', length: 100, unique: false, nullable: false })
   name: string;
-
-  @ApiProperty({
-    example: 'Es el área de sistema',
-    description: 'Una descripción breve',
-    uniqueItems: true,
-    nullable: false,
-  })
-  @Column({ type: 'varchar', unique: false, nullable: false })
-  description: string;
 }

@@ -30,14 +30,27 @@ const EditMaintenance = ({
 
   const [availableMaterials, setAvailableMaterials] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem("access_token");
 
   const fetchMaintenanceData = async () => {
     try {
       const [maintenanceResponse, materialResponse, maintenancesResponse] =
         await Promise.all([
-          axios.get(`http://localhost:3001/mantenimiento/${idMantenimiento}`),
-          axios.get("http://localhost:3001/material"),
-          axios.get("http://localhost:3001/mantenimiento"),
+          axios.get(`http://localhost:3001/mantenimiento/${idMantenimiento}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          axios.get("http://localhost:3001/material", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          axios.get("http://localhost:3001/mantenimiento", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
         ]);
 
       const maintenanceData = maintenanceResponse.data?.data || {};
@@ -116,13 +129,17 @@ const EditMaintenance = ({
     });
   };
 
-  // Enviar los cambios de mantenimiento
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await axios.patch(
         `http://localhost:3001/mantenimiento/${idMantenimiento}`,
-        formData
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       onMaintenanceUpdated();
       onClose();

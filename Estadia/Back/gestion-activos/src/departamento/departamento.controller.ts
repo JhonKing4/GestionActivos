@@ -6,18 +6,31 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { DepartamentoService } from './departamento.service';
 import { CreateDepartamentoDto } from './dto/create-departamento.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Departamento } from './entities/departamento.entity';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { RequireRoles } from 'src/decorators/roles.decorator';
+import { Roles } from 'src/usuario/enums/roles.enum';
 
 @ApiTags('Departamentos')
 @Controller('departamentos')
 export class DepartamentoController {
-  constructor(private readonly departamentoService: DepartamentoService) { }
+  constructor(private readonly departamentoService: DepartamentoService) {}
 
   @Post()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Crear un nuevo proveedor' })
   @ApiResponse({
     status: 201,
@@ -39,6 +52,8 @@ export class DepartamentoController {
   }
 
   @Get()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Obtener todos los Departamentos o áreas' })
   @ApiResponse({
     status: 200,
@@ -51,6 +66,9 @@ export class DepartamentoController {
   }
 
   @Get(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Obtener un departamento por ID' })
   @ApiResponse({
     status: 200,
@@ -64,6 +82,9 @@ export class DepartamentoController {
   }
 
   @Patch(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Actualizar un Departamento o área por ID' })
   @ApiResponse({
     status: 200,
@@ -83,6 +104,9 @@ export class DepartamentoController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN)
   @ApiOperation({ summary: 'Eliminar un Departamento o área por ID' })
   @ApiResponse({
     status: 200,
@@ -98,6 +122,9 @@ export class DepartamentoController {
   }
 
   @Get('name/:name')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Buscar Departamentos por nombre' })
   @ApiResponse({
     status: 200,

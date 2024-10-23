@@ -58,4 +58,13 @@ export class Usuario {
   })
   @Column({ type: 'enum', enum: Roles, unique: false, nullable: false })
   roles: number;
+
+  @ApiProperty({
+    example: 'Aruba',
+    description: 'Colocar el nombre de la empresa',
+    uniqueItems: false,
+    nullable: false,
+  })
+  @Column({ type: 'varchar', length: 100, unique: false, nullable: false })
+  companyname: string;
 }

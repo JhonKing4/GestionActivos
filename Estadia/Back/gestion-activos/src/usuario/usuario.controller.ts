@@ -11,23 +11,29 @@ import {
 import { UsuarioService } from './usuario.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Usuario } from './entities/usuario.entity';
 import { LoginUsuarioDto } from './dto/login.dto';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { RolesGuard } from '../guards/roles.guard';
 import { RequireRoles } from '../decorators/roles.decorator';
 import { Roles } from './enums/roles.enum';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/guards/roles.guard';
 
 @ApiTags('Usuarios')
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('usuario')
 export class UsuarioController {
   constructor(private readonly usuarioService: UsuarioService) {}
 
   @Post()
-  @RequireRoles(Roles.ADMIN)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Crear un nuevo Usuario' })
   @ApiResponse({
     status: 201,
@@ -44,13 +50,14 @@ export class UsuarioController {
   }
 
   @Post('login')
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Iniciar sesión con credenciales' })
   async login(@Body() loginDto: LoginUsuarioDto): Promise<LoginResponseDto> {
     return await this.usuarioService.login(loginDto);
   }
 
   @Get()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Obtener todos los usuarios' })
   @ApiResponse({
     status: 200,
@@ -63,6 +70,8 @@ export class UsuarioController {
   }
 
   @Get(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Obtener un usuario por ID' })
   @ApiResponse({
@@ -77,6 +86,8 @@ export class UsuarioController {
   }
 
   @Patch(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Actualizar un usuario por ID' })
   @ApiResponse({
@@ -97,6 +108,8 @@ export class UsuarioController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @RequireRoles(Roles.ADMIN)
   @ApiOperation({ summary: 'Eliminar un Usuario por ID' })
   @ApiResponse({
@@ -113,6 +126,8 @@ export class UsuarioController {
   }
 
   @Get('search/:searchTerm')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Buscar usuarios por nombre, email o rol' })
   @ApiResponse({

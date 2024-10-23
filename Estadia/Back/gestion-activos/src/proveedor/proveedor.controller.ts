@@ -6,11 +6,16 @@ import {
   Param,
   Delete,
   Patch,
+  UseGuards,
 } from '@nestjs/common';
 import { ProveedorService } from './proveedor.service';
 import { CreateProveedorDto } from './dto/create-proveedor.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Proveedor } from './entities/proveedor.entity';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { RequireRoles } from 'src/decorators/roles.decorator';
+import { Roles } from 'src/usuario/enums/roles.enum';
 
 @ApiTags('Proveedores')
 @Controller('proveedores')
@@ -18,6 +23,9 @@ export class ProveedorController {
   constructor(private readonly proveedorService: ProveedorService) {}
 
   @Post()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Crear un nuevo proveedor' })
   @ApiResponse({
     status: 201,
@@ -37,6 +45,8 @@ export class ProveedorController {
   }
 
   @Get()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Obtener todos los proveedores' })
   @ApiResponse({
     status: 200,
@@ -49,6 +59,9 @@ export class ProveedorController {
   }
 
   @Get(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Obtener un proveedor por ID' })
   @ApiResponse({
     status: 200,
@@ -62,6 +75,9 @@ export class ProveedorController {
   }
 
   @Patch(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Actualizar un proveedor por ID' })
   @ApiResponse({
     status: 200,
@@ -81,6 +97,9 @@ export class ProveedorController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN)
   @ApiOperation({ summary: 'Eliminar un proveedor por ID' })
   @ApiResponse({
     status: 200,
@@ -96,6 +115,9 @@ export class ProveedorController {
   }
 
   @Get('search/:searchTerm')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Buscar usuarios por nombre, email o rol' })
   @ApiResponse({
     status: 200,

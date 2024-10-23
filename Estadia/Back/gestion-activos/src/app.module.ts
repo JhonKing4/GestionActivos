@@ -14,12 +14,14 @@ import { AsignacionModule } from './asignacion/asignacion.module';
 import { RelacionElementsModule } from './relacion-elements/relacion-elements.module';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth.module';
+import { JwtStrategy } from './auth/strategies/jwt.strategy';
+import { RolesGuard } from './guards/roles.guard';
 
 @Module({
   imports: [
     JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: process.env.JWT_EXPIRATION },
+      secret: process.env.JWT_SECRET || 'mySecretKey',
+      signOptions: { expiresIn: '60m' },
     }),
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
@@ -44,6 +46,6 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, JwtStrategy, RolesGuard],
 })
 export class AppModule {}

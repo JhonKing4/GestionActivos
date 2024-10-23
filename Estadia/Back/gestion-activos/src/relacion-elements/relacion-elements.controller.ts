@@ -6,11 +6,21 @@ import {
   Param,
   Delete,
   Patch,
+  UseGuards,
 } from '@nestjs/common';
 import { RelacionElementsService } from './relacion-elements.service';
 import { CreateRelacionElementDto } from './dto/create-relacion-element.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { RelacionElement } from './entities/relacion-element.entity';
+import { RequireRoles } from 'src/decorators/roles.decorator';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { Roles } from 'src/usuario/enums/roles.enum';
 
 @ApiTags('Relacion de Padre-Hijo')
 @Controller('relacion-elements')
@@ -20,6 +30,9 @@ export class RelacionElementsController {
   ) {}
 
   @Post()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Crear una nueva relación de elementos' })
   @ApiResponse({
     status: 201,
@@ -35,6 +48,8 @@ export class RelacionElementsController {
   }
 
   @Get()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Obtener todas las relaciones de elementos' })
   @ApiResponse({
     status: 200,
@@ -47,6 +62,9 @@ export class RelacionElementsController {
   }
 
   @Get(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Obtener una relación de elementos por ID' })
   @ApiResponse({
     status: 200,
@@ -60,6 +78,9 @@ export class RelacionElementsController {
   }
 
   @Patch(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN, Roles.USUARIO)
   @ApiOperation({ summary: 'Actualizar una relación por ID ' })
   @ApiResponse({
     status: 200,
@@ -77,7 +98,11 @@ export class RelacionElementsController {
   ) {
     return await this.relacionElementsService.update(id, updateAsignacionDto);
   }
+
   @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN)
   @ApiOperation({ summary: 'Eliminar una relación de elementos por ID' })
   @ApiResponse({
     status: 200,

@@ -37,11 +37,17 @@ const Home = () => {
   const [materialData, setMaterialData] = useState<Material[]>([]);
   const [assignmentData, setAssignmentData] = useState<Asignacion[]>([]);
   const navigate = useNavigate();
+  const token = localStorage.getItem("access_token");
 
   const fetchMaterialData = async () => {
     try {
       const response = await axios.get<Material[]>(
-        "http://localhost:3001/material"
+        "http://localhost:3001/material",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       setMaterialData(response.data);
     } catch (error) {
@@ -52,7 +58,12 @@ const Home = () => {
   const fetchAssignmentData = async () => {
     try {
       const response = await axios.get<Asignacion[]>(
-        "http://localhost:3001/asignacion"
+        "http://localhost:3001/asignacion",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       setAssignmentData(response.data);
     } catch (error) {
@@ -81,7 +92,7 @@ const Home = () => {
     <div className="app-container">
       <Side />
       <div className="main-content">
-        <Header userName="Jhoandi" />
+        <Header/>
         <div className="home-content">
           <div className="tables-container">
             <div className="table-section">

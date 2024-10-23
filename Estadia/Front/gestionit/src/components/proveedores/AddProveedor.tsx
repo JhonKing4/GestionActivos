@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useState } from "react";
-import "../../styles/ModalAddEdit.css"
+import "../../styles/ModalAddEdit.css";
 
 interface AddProveedorProps {
   isOpen: boolean;
@@ -21,6 +21,8 @@ const AddProveedor = ({
     rfc: "",
   });
 
+  const token = localStorage.getItem("access_token");
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -34,7 +36,11 @@ const AddProveedor = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:3001/proveedores", formData);
+      await axios.post("http://localhost:3001/proveedores", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       onProveedorAdded();
       setFormData({ name: "", phone: "", address: "", email: "", rfc: "" });
       onClose();
@@ -49,7 +55,7 @@ const AddProveedor = ({
     <div className="modal-overlay">
       <div className="modal-content">
         <div className="modal-header">
-          <h2>Agregar Hotel</h2>
+          <h2>Agregar Proveedor</h2>
           <button className="close-button" onClick={onClose}>
             &times;
           </button>
@@ -103,7 +109,7 @@ const AddProveedor = ({
               value={formData.email}
               onChange={handleInputChange}
               required
-              title="Debe ingresar un correo electrónico válido" // Validación para el email
+              title="Debe ingresar un correo electrónico válido"
             />
           </div>
 

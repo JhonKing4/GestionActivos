@@ -23,6 +23,10 @@ const Login = () => {
 
       console.log("Respuesta recibida:", response.data);
 
+      localStorage.setItem("access_token", response.data.access_token);
+
+      localStorage.setItem("user", JSON.stringify(response.data.usuario));
+
       navigate("/home");
     } catch (err: unknown) {
       console.log("Error en la solicitud:", err);

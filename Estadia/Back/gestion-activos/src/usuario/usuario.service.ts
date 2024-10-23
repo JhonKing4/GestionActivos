@@ -20,6 +20,33 @@ export class UsuarioService {
     private jwtService: JwtService,
   ) {}
 
+  async onModuleInit() {
+    await this.createDefaultUser();
+  }
+
+  private async createDefaultUser() {
+    const defaultEmail = process.env.DEFAULT_USER_EMAIL;
+    const userExists = await this.usuarioRepository.findOne({
+      where: { email: defaultEmail },
+    });
+
+    if (!userExists) {
+      const newUser = this.usuarioRepository.create({
+        name: process.env.DEFAULT_USER_NAME,
+        email: defaultEmail,
+        password: process.env.DEFAULT_USER_PASSWORD,
+        numberColaborador: process.env.DEFAULT_USER_NUMBER_COLABORADOR,
+        roles: +process.env.DEFAULT_USER_ROLES,
+        companyname: process.env.DEFAULT_USER_COMPANY,
+      });
+
+      await this.usuarioRepository.save(newUser);
+      console.log('Usuario predeterminado creado');
+    } else {
+      console.log('El usuario predeterminado ya existe');
+    }
+  }
+
   async validateUser(loginDto: LoginUsuarioDto): Promise<Usuario> {
     const { email, password } = loginDto;
     const usuario = await this.usuarioRepository.findOne({
@@ -38,28 +65,13 @@ export class UsuarioService {
     const payload = {
       email: usuario.email,
       sub: usuario.idUsuario,
-      roles: usuario.roles,
+      roles: [usuario.roles],
     };
-
     return {
       access_token: this.jwtService.sign(payload),
       usuario,
     };
   }
-
-  /*async login(loginDto: LoginUsuarioDto): Promise<Usuario> {
-    const { email, password } = loginDto;
-
-    const usuario = await this.usuarioRepository.findOne({
-      where: { email },
-    });
-
-    if (!usuario || usuario.password !== password) {
-      throw new BadRequestException('Credenciales incorrectas');
-    }
-
-    return usuario;
-  }*/
 
   async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {
     const usuario = this.usuarioRepository.create(createUsuarioDto);
@@ -105,6 +117,7 @@ export class UsuarioService {
       where: [
         { name: ILike(`%${searchTerm}%`) },
         { email: ILike(`%${searchTerm}%`) },
+        { companyname: ILike(`%${searchTerm}%`) },
         { numberColaborador: ILike(`%${searchTerm}%`) },
       ],
     });
