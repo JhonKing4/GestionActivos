@@ -128,7 +128,12 @@ const EditAssignment = ({
         },
       });
       const departmentResponse = await axios.get(
-        "http://localhost:3001/departamentos"
+        "http://localhost:3001/departamentos",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const hotelResponse = await axios.get("http://localhost:3001/hoteles", {
         headers: {

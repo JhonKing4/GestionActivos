@@ -6,15 +6,15 @@ import {
   Text,
   View,
   StyleSheet,
-  Font,
   BlobProvider,
   Image,
 } from "@react-pdf/renderer";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import logoImage from "../../assets/images/majestic-resorts-logo.jpg";
-import { Download } from "lucide-react";
-import "../../styles/inventario.css"
+import { Download, RefreshCcw } from "lucide-react";
+import "../../styles/inventario.css";
+
 
 interface AssignmentData {
   idAsignacion: string;
@@ -106,7 +106,8 @@ const PDFDocument: React.FC<{ data: AssignmentData }> = ({ data }) => (
         <Text style={styles.text}>
           <Text style={styles.boldText}>{data.usuario.name}</Text>, de col:{" "}
           {data.usuario.numberColaborador} en mi calidad de empleado de la
-          empresa <Text style={styles.boldText}>{data.usuario.companyname},</Text>{" "}
+          empresa{" "}
+          <Text style={styles.boldText}>{data.usuario.companyname},</Text>{" "}
           reconozco haber recibido los siguientes equipos de la empresa en
           perfectas condiciones, los cuales se detallan a continuación:
         </Text>
@@ -172,6 +173,7 @@ const PDFDownloadButton: React.FC<{ assignmentId: string }> = ({
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [shouldReload, setShouldReload] = useState(false);
   const token = localStorage.getItem("access_token");
 
   const fetchAssignmentData = async () => {
@@ -196,7 +198,11 @@ const PDFDownloadButton: React.FC<{ assignmentId: string }> = ({
 
   useEffect(() => {
     fetchAssignmentData();
-  }, [assignmentId]);
+  }, [assignmentId, shouldReload]);
+
+  const handleReload = () => {
+    setShouldReload((prev) => !prev);
+  };
 
   if (error) return <button disabled>Error: {error}</button>;
   if (loading) return <button disabled>Cargando datos...</button>;
@@ -204,6 +210,9 @@ const PDFDownloadButton: React.FC<{ assignmentId: string }> = ({
 
   return (
     <div id="unique-pdf-button">
+      <button onClick={handleReload}>
+        <RefreshCcw size={18} />
+      </button>{" "}
       <BlobProvider document={<PDFDocument data={assignmentData} />}>
         {({ blob, url, loading: pdfLoading, error: pdfError }) => {
           if (pdfLoading) {
@@ -224,7 +233,6 @@ const PDFDownloadButton: React.FC<{ assignmentId: string }> = ({
               }}
             >
               <Download size={18} />
-              Descargar
             </button>
           );
         }}

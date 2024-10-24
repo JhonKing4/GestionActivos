@@ -13,13 +13,14 @@
 }
 
 #pdf-download-btn {
-  background-color: #2b435b;
-  color: white;
+  color: rgb(22, 119, 77);
   cursor: pointer;
+  align-items: center;
+  justify-content: center;
 }
 
 #pdf-download-btn:hover {
-  background-color: #1d4ed8;
+  background-color: #18c2ec;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
 }
 
@@ -51,20 +52,20 @@
 /*Plantilla css */
 #unique-pdf-button {
   display: flex;
+  align-items: center;
   justify-content: center;
-  margin-top: 20px;
 }
 
 #unique-pdf-button button {
-  background-color: #007bff;
-  color: white;
+  color: rgb(22, 119, 77);
   border: none;
-  padding: 10px 20px;
+  padding: 5px 10px;
   border-radius: 5px;
   cursor: pointer;
   font-size: 10px;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
   transition: background-color 0.3s ease;
 }
@@ -75,5 +76,5 @@
 }
 
 #unique-pdf-button button:hover:not(:disabled) {
-  background-color: #0056b3;
+  background-color: #18c2ec;
 }
