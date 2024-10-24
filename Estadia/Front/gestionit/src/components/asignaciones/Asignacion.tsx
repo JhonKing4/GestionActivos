@@ -10,6 +10,7 @@ import EditAssignment from "./EditAsignacion";
 import { PDFDownloadButton } from "../Extras/Plantilla";
 import Loader from "../Extras/loading";
 import Pagination from "../Extras/pagination";
+import NotFound from "../Extras/Not Found";
 
 interface Material {
   idMaterial: string;
@@ -168,7 +169,7 @@ const Asignacion = () => {
   const totalPages = Math.ceil(assignmentData.length / itemsPerPage);
 
   if (loading) return <Loader />;
-  if (error) return <p>{error}</p>;
+  if (error) return <NotFound />;
 
   return (
     <div className="app-container">

@@ -9,6 +9,7 @@ import AddHotel from "./AddHotel";
 import EditHotel from "./EditHotel";
 import Loader from "../Extras/loading";
 import Pagination from "../Extras/pagination";
+import NotFound from "../Extras/Not Found";
 
 interface AssignmentItem {
   idHotel: string;
@@ -127,7 +128,7 @@ const Hotel = () => {
   const totalPages = Math.ceil(hotels.length / itemsPerPage);
 
   if (loading) return <Loader />;
-  if (error) return <p>{error}</p>;
+  if (error) return <NotFound />;
 
   return (
     <div className="app-container">

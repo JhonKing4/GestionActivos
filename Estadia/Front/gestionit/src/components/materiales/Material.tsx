@@ -10,6 +10,7 @@ import Loader from "../Extras/loading";
 import axios from "axios";
 import Pagination from "../Extras/PaginationMaterial";
 import { PDFDownloadButton } from "../Extras/PlantillaInventario";
+import NotFound from "../Extras/Not Found";
 
 interface Hotel {
   idHotel: string;
@@ -278,7 +279,7 @@ const Material: React.FC = () => {
   const totalPages = Math.ceil(processedMaterials.length / itemsPerPage);
 
   if (loading) return <Loader />;
-  if (error) return <p>{error}</p>;
+  if (error) return <NotFound/>;
 
   return (
     <div className="app-container">

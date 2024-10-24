@@ -10,6 +10,7 @@ import AddDepartamento from "./AddDepartamento";
 import EditDepartamento from "./EditDepartamento";
 import Loader from "../Extras/loading";
 import Pagination from "../Extras/pagination";
+import NotFound from "../Extras/Not Found";
 
 interface AssignmentItem {
   idDepartamento: string;
@@ -143,7 +144,7 @@ const Departamento = () => {
   const totalPages = Math.ceil(departamentos.length / itemsPerPage);
 
   if (loading) return <Loader />;
-  if (error) return <p>{error}</p>;
+  if (error) return <NotFound />;
 
   return (
     <div className="app-container">

@@ -9,6 +9,7 @@ import AddProveedor from "./AddProveedor";
 import EditProveedor from "./EditProveedor";
 import Loader from "../Extras/loading";
 import Pagination from "../Extras/pagination";
+import NotFound from "../Extras/Not Found";
 
 interface AssignmentItem {
   idProveedor: string;
@@ -142,7 +143,7 @@ const Proveedor = () => {
   const totalPages = Math.ceil(proveedors.length / itemsPerPage);
 
   if (loading) return <Loader />;
-  if (error) return <p>{error}</p>;
+  if (error) return <NotFound/>;
 
   return (
     <div className="app-container">

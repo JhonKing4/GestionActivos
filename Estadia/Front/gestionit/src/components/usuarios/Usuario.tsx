@@ -180,7 +180,7 @@ const Usuario = () => {
                         <td>{user.name}</td>
                         <td>{user.email}</td>
                         <td>{user.numberColaborador}</td>
-                        <td>{user.password}</td>
+                        <td>{"******"}</td>
                         <td>{user.roles === 0 ? "Admin" : "Colaborador"}</td>
                         <td>{user.companyname}</td>
                         <td>

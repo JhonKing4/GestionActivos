@@ -9,6 +9,7 @@ import AddMaintenance from "./AddMantenimiento";
 import EditMaintenance from "./EditMantenimiento";
 import Loader from "../Extras/loading";
 import Pagination from "../Extras/pagination";
+import NotFound from "../Extras/Not Found";
 
 interface Material {
   idMaterial: string;
@@ -152,7 +153,7 @@ const Mantenimiento = () => {
   const totalPages = Math.ceil(maintenanceData.length / itemsPerPage);
 
   if (loading) return <Loader />;
-  if (error) return <p>{error}</p>;
+  if (error) return <NotFound/>;
 
   return (
     <div className="app-container">
