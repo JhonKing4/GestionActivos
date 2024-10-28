@@ -28,7 +28,7 @@ const EditProveedor = ({
     const fetchProveedorData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/proveedores/${idProveedor}`,
+          `${process.env.REACT_APP_API_URL}/proveedores/${idProveedor}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -75,7 +75,7 @@ const EditProveedor = ({
 
     try {
       await axios.patch(
-        `http://localhost:3001/proveedores/${idProveedor}`,
+        `${process.env.REACT_APP_API_URL}/proveedores/${idProveedor}`,
         updatedData,
         {
           headers: {

@@ -16,10 +16,13 @@ const Login = () => {
 
     try {
       console.log("Enviando petición...");
-      const response = await axios.post("http://localhost:3001/usuario/login", {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/usuario/login`,
+        {
+          email,
+          password,
+        }
+      );
 
       console.log("Respuesta recibida:", response.data);
 
@@ -74,7 +77,6 @@ const Login = () => {
               <input
                 type="email"
                 id="email"
-                placeholder="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="login-input"
@@ -89,7 +91,6 @@ const Login = () => {
                 <input
                   type="password"
                   id="password"
-                  placeholder="*******"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="login-input"

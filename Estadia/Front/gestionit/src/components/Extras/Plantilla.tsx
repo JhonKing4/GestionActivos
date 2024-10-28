@@ -181,7 +181,7 @@ const PDFDownloadButton: React.FC<{ assignmentId: string }> = ({
     setError(null);
     try {
       const response = await axios.get<AssignmentData>(
-        `http://localhost:3001/asignacion/${assignmentId}`,
+        `${process.env.REACT_APP_API_URL}/asignacion/${assignmentId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

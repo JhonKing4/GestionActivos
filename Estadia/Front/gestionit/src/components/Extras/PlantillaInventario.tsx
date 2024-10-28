@@ -259,10 +259,10 @@ const PDFDownloadButton: React.FC = () => {
     setError(null);
     try {
       const [materialesRes, asignacionesRes] = await Promise.all([
-        axios.get<MaterialData[]>("http://localhost:3001/material", {
+        axios.get<MaterialData[]>(`${process.env.REACT_APP_API_URL}/material`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get<AsignacionData[]>("http://localhost:3001/asignacion", {
+        axios.get<AsignacionData[]>(`${process.env.REACT_APP_API_URL}/asignacion`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);

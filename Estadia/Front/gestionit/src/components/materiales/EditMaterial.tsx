@@ -45,27 +45,27 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
         departamentosRes,
         hotelesRes,
       ] = await Promise.all([
-        axios.get("http://localhost:3001/material", {
+        axios.get(`${process.env.REACT_APP_API_URL}/material`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }),
-        axios.get("http://localhost:3001/relacion-elements", {
+        axios.get(`${process.env.REACT_APP_API_URL}/relacion-elements`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }),
-        axios.get("http://localhost:3001/proveedores", {
+        axios.get(`${process.env.REACT_APP_API_URL}/proveedores`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }),
-        axios.get("http://localhost:3001/departamentos", {
+        axios.get(`${process.env.REACT_APP_API_URL}/departamentos`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }),
-        axios.get("http://localhost:3001/hoteles", {
+        axios.get(`${process.env.REACT_APP_API_URL}/hoteles`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -160,7 +160,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
 
     try {
       const responseMaterial = await axios.patch(
-        `http://localhost:3001/material/${updatedMaterial.idMaterial}`,
+        `${process.env.REACT_APP_API_URL}/material/${updatedMaterial.idMaterial}`,
         updatedMaterialData,
         {
           headers: {
@@ -186,7 +186,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
           isValidUUID(existingRelation.idRelacionElement)
         ) {
           await axios.patch(
-            `http://localhost:3001/relacion-elements/${existingRelation.idRelacionElement}`,
+            `${process.env.REACT_APP_API_URL}/relacion-elements/${existingRelation.idRelacionElement}`,
             relacionData,
             {
               headers: {
@@ -196,7 +196,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
           );
         } else {
           await axios.post(
-            `http://localhost:3001/relacion-elements`,
+            `${process.env.REACT_APP_API_URL}/relacion-elements`,
             relacionData,
             {
               headers: {
@@ -210,7 +210,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
         }
       } else {
         await axios.post(
-          `http://localhost:3001/relacion-elements`,
+          `${process.env.REACT_APP_API_URL}/relacion-elements`,
           relacionData,
           {
             headers: {

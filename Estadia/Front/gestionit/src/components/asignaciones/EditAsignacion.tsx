@@ -37,7 +37,7 @@ const EditAssignment = ({
   const fetchAssignment = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3001/asignacion/${assignmentId}`,
+        `${process.env.REACT_APP_API_URL}/asignacion/${assignmentId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -64,7 +64,7 @@ const EditAssignment = ({
   const fetchMaterialsAndAssignments = async () => {
     try {
       const materialResponse = await axios.get(
-        "http://localhost:3001/material",
+        `${process.env.REACT_APP_API_URL}/material`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -72,7 +72,7 @@ const EditAssignment = ({
         }
       );
       const assignmentsResponse = await axios.get(
-        "http://localhost:3001/asignacion",
+        `${process.env.REACT_APP_API_URL}/asignacion`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -89,7 +89,7 @@ const EditAssignment = ({
         );
 
       const assignmentResponse = await axios.get(
-        `http://localhost:3001/asignacion/${assignmentId}`,
+        `${process.env.REACT_APP_API_URL}/asignacion/${assignmentId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -122,20 +122,20 @@ const EditAssignment = ({
 
   const fetchAdditionalData = async () => {
     try {
-      const userResponse = await axios.get("http://localhost:3001/usuario", {
+      const userResponse = await axios.get(`${process.env.REACT_APP_API_URL}/usuario`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       const departmentResponse = await axios.get(
-        "http://localhost:3001/departamentos",
+        `${process.env.REACT_APP_API_URL}/departamentos`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      const hotelResponse = await axios.get("http://localhost:3001/hoteles", {
+      const hotelResponse = await axios.get(`${process.env.REACT_APP_API_URL}/hoteles`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -188,7 +188,7 @@ const EditAssignment = ({
     e.preventDefault();
     try {
       await axios.patch(
-        `http://localhost:3001/asignacion/${assignmentId}`,
+        `${process.env.REACT_APP_API_URL}/asignacion/${assignmentId}`,
         formData,
         {
           headers: {

@@ -105,12 +105,12 @@ const Material: React.FC = () => {
   const fetchData = async () => {
     try {
       const [materialsResponse, relationsResponse] = await Promise.all([
-        fetch("http://localhost:3001/material", {
+        fetch(`${process.env.REACT_APP_API_URL}/material`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }),
-        fetch("http://localhost:3001/relacion-elements", {
+        fetch(`${process.env.REACT_APP_API_URL}/relacion-elements`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -216,7 +216,7 @@ const Material: React.FC = () => {
   const handleDeleteMaterial = async (materialId: string) => {
     try {
       const response = await fetch(
-        `http://localhost:3001/relacion-elements/${materialId}`,
+        `${process.env.REACT_APP_API_URL}/relacion-elements/${materialId}`,
         {
           method: "DELETE",
           headers: {
@@ -253,7 +253,7 @@ const Material: React.FC = () => {
     }
     try {
       const response = await axios.get(
-        `http://localhost:3001/material/search/${searchTerm}`,
+        `${process.env.REACT_APP_API_URL}/material/search/${searchTerm}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

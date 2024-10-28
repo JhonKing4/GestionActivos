@@ -23,7 +23,7 @@ const EditDepartamento = ({
     const fetchDepartamentoData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/departamentos/${idDepartamento}`,
+          `${process.env.REACT_APP_API_URL}/departamentos/${idDepartamento}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -62,7 +62,7 @@ const EditDepartamento = ({
 
     try {
       await axios.patch(
-        `http://localhost:3001/departamentos/${idDepartamento}`,
+        `${process.env.REACT_APP_API_URL}/departamentos/${idDepartamento}`,
         updatedData,
         {
           headers: {

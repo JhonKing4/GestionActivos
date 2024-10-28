@@ -42,7 +42,7 @@ const Home = () => {
   const fetchMaterialData = async () => {
     try {
       const response = await axios.get<Material[]>(
-        "http://localhost:3001/material",
+        `${process.env.REACT_APP_API_URL}/material`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -58,7 +58,7 @@ const Home = () => {
   const fetchAssignmentData = async () => {
     try {
       const response = await axios.get<Asignacion[]>(
-        "http://localhost:3001/asignacion",
+        `${process.env.REACT_APP_API_URL}/asignacion`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -92,7 +92,7 @@ const Home = () => {
     <div className="app-container">
       <Side />
       <div className="main-content">
-        <Header/>
+        <Header />
         <div className="home-content">
           <div className="tables-container">
             <div className="table-section">

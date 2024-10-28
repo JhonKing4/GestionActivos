@@ -53,7 +53,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
   useEffect(() => {
     const fetchProveedores = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/proveedores", {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/proveedores`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -67,7 +67,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
     const fetchDepartamentos = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3001/departamentos",
+          `${process.env.REACT_APP_API_URL}/departamentos`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -82,7 +82,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
 
     const fetchHoteles = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/hoteles", {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/hoteles`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -145,7 +145,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
 
     try {
       const response = await axios.post(
-        "http://localhost:3001/material",
+        `${process.env.REACT_APP_API_URL}/material`,
         subMaterialData,
         {
           headers: {
@@ -199,7 +199,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
 
     try {
       const responseMaterial = await axios.post(
-        "http://localhost:3001/material",
+        `${process.env.REACT_APP_API_URL}/material`,
         materialData,
         {
           headers: {
@@ -219,7 +219,7 @@ const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
         };
 
         await axios.post(
-          "http://localhost:3001/relacion-elements",
+          `${process.env.REACT_APP_API_URL}/relacion-elements`,
           relacionData,
           {
             headers: {

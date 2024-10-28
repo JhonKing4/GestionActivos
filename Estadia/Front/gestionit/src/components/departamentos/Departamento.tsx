@@ -38,7 +38,7 @@ const Departamento = () => {
 
   const fetchDepartamentos = async () => {
     try {
-      const response = await axios.get("http://localhost:3001/departamentos", {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/departamentos`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -64,7 +64,7 @@ const Departamento = () => {
     if (selectedDepartament) {
       try {
         await axios.delete(
-          `http://localhost:3001/departamentos/${selectedDepartament}`,
+          `${process.env.REACT_APP_API_URL}/departamentos/${selectedDepartament}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -112,7 +112,7 @@ const Departamento = () => {
     }
     try {
       const response = await axios.get(
-        `http://localhost:3001/departamentos/name/${searchTerm}`,
+        `${process.env.REACT_APP_API_URL}/departamentos/name/${searchTerm}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

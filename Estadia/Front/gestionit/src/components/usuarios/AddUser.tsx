@@ -32,7 +32,7 @@ const AddUser = ({ isOpen, onClose, onUserAdded }: AddUserProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:3001/usuario", formData, {
+      await axios.post(`${process.env.REACT_APP_API_URL}/usuario`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

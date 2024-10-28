@@ -35,7 +35,7 @@ const AddAssignment = ({
   const fetchMaterialsAndAssignments = async () => {
     try {
       const materialResponse = await axios.get(
-        "http://localhost:3001/material",
+        `${process.env.REACT_APP_API_URL}/material`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -43,7 +43,7 @@ const AddAssignment = ({
         }
       );
       const assignmentResponse = await axios.get(
-        "http://localhost:3001/asignacion",
+        `${process.env.REACT_APP_API_URL}/asignacion`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -69,20 +69,20 @@ const AddAssignment = ({
 
   const fetchAdditionalData = async () => {
     try {
-      const userResponse = await axios.get("http://localhost:3001/usuario", {
+      const userResponse = await axios.get(`${process.env.REACT_APP_API_URL}/usuario`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       const departmentResponse = await axios.get(
-        "http://localhost:3001/departamentos",
+        `${process.env.REACT_APP_API_URL}/departamentos`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      const hotelResponse = await axios.get("http://localhost:3001/hoteles", {
+      const hotelResponse = await axios.get(`${process.env.REACT_APP_API_URL}/hoteles`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -143,7 +143,7 @@ const AddAssignment = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:3001/asignacion", formData, {
+      await axios.post(`${process.env.REACT_APP_API_URL}/asignacion`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

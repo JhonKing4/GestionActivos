@@ -33,7 +33,7 @@ const AddMaintenance = ({
   const fetchMaterials = async () => {
     try {
       const materialResponse = await axios.get(
-        "http://localhost:3001/material",
+        `${process.env.REACT_APP_API_URL}/material`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -41,7 +41,7 @@ const AddMaintenance = ({
         }
       );
       const maintenanceResponse = await axios.get(
-        "http://localhost:3001/mantenimiento",
+        `${process.env.REACT_APP_API_URL}/mantenimiento`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -93,7 +93,7 @@ const AddMaintenance = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:3001/mantenimiento", formData, {
+      await axios.post(`${process.env.REACT_APP_API_URL}/mantenimiento`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

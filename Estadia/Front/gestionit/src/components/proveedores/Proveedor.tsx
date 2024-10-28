@@ -41,7 +41,7 @@ const Proveedor = () => {
 
   const fecthProveedors = async () => {
     try {
-      const response = await axios.get("http://localhost:3001/proveedores", {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/proveedores`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -67,7 +67,7 @@ const Proveedor = () => {
     if (selectedProveedors) {
       try {
         await axios.delete(
-          `http://localhost:3001/proveedores/${selectedProveedors}`,
+          `${process.env.REACT_APP_API_URL}/proveedores/${selectedProveedors}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -114,7 +114,7 @@ const Proveedor = () => {
     }
     try {
       const response = await axios.get(
-        `http://localhost:3001/proveedores/search/${searchTerm}`,
+        `${process.env.REACT_APP_API_URL}/proveedores/search/${searchTerm}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

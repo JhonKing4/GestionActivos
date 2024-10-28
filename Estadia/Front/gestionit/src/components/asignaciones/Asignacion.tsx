@@ -64,7 +64,7 @@ const Asignacion = () => {
 
   const fetchAssigment = async () => {
     try {
-      const response = await axios.get("http://localhost:3001/asignacion", {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/asignacion`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -90,7 +90,7 @@ const Asignacion = () => {
     if (selectedAssigment) {
       try {
         await axios.delete(
-          `http://localhost:3001/asignacion/${selectedAssigment}`,
+          `${process.env.REACT_APP_API_URL}/asignacion/${selectedAssigment}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -137,7 +137,7 @@ const Asignacion = () => {
     }
     try {
       const response = await axios.get(
-        `http://localhost:3001/asignacion/search/${searchTerm}`,
+        `${process.env.REACT_APP_API_URL}/asignacion/search/${searchTerm}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

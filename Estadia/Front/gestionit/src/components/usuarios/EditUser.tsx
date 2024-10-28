@@ -30,7 +30,7 @@ const EditUser = ({
     const fetchUserData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/usuario/${userId}`,
+          `${process.env.REACT_APP_API_URL}/usuario/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -78,7 +78,7 @@ const EditUser = ({
 
     try {
       await axios.patch(
-        `http://localhost:3001/usuario/${userId}`,
+        `${process.env.REACT_APP_API_URL}/usuario/${userId}`,
         updatedData,
         {
           headers: {

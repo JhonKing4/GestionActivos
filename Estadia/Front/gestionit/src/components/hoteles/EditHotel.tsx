@@ -25,7 +25,7 @@ const EditHotel = ({
     const fetcHotelData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/hoteles/${idHotel}`,
+          `${process.env.REACT_APP_API_URL}/hoteles/${idHotel}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -64,7 +64,7 @@ const EditHotel = ({
 
     try {
       await axios.patch(
-        `http://localhost:3001/hoteles/${idHotel}`,
+        `${process.env.REACT_APP_API_URL}/hoteles/${idHotel}`,
         updatedData,
         {
           headers: {

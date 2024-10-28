@@ -31,7 +31,7 @@ const Usuario = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [isErrorModalOpen, setIsErrorModalOpen] = useState<boolean>(false); //modal error
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [usersPerPage, setUsersPerPage] = useState<number>(10);
   const indexOfLastUser = currentPage * usersPerPage;
@@ -43,12 +43,12 @@ const Usuario = () => {
   const fetchUsers = async (term: string = "") => {
     try {
       const response = term
-        ? await axios.get(`http://localhost:3001/usuario/search/${term}`, {
+        ? await axios.get(`${process.env.REACT_APP_API_URL}/usuario/search/${term}`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           })
-        : await axios.get("http://localhost:3001/usuario", {
+        : await axios.get(`${process.env.REACT_APP_API_URL}/usuario`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -83,7 +83,7 @@ const Usuario = () => {
   const handleDeleteConfirm = async () => {
     if (selectedUser) {
       try {
-        await axios.delete(`http://localhost:3001/usuario/${selectedUser}`, {
+        await axios.delete(`${process.env.REACT_APP_API_URL}/usuario/${selectedUser}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

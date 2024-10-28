@@ -48,7 +48,7 @@ const Mantenimiento = () => {
 
   const fetchMaintenance = async () => {
     try {
-      const response = await axios.get("http://localhost:3001/mantenimiento", {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/mantenimiento`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -74,7 +74,7 @@ const Mantenimiento = () => {
     if (selectedMaintenance) {
       try {
         await axios.delete(
-          `http://localhost:3001/mantenimiento/${selectedMaintenance}`,
+          `${process.env.REACT_APP_API_URL}/mantenimiento/${selectedMaintenance}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -121,7 +121,7 @@ const Mantenimiento = () => {
     }
     try {
       const response = await axios.get(
-        `http://localhost:3001/mantenimiento/search/${searchTerm}`,
+        `${process.env.REACT_APP_API_URL}/mantenimiento/search/${searchTerm}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -33,7 +33,7 @@ const Hotel = () => {
 
   const fetchHotels = async () => {
     try {
-      const response = await axios.get("http://localhost:3001/hoteles", {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/hoteles`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -58,7 +58,7 @@ const Hotel = () => {
   const handleDeleteConfirm = async () => {
     if (selectedHotel) {
       try {
-        await axios.delete(`http://localhost:3001/hoteles/${selectedHotel}`, {
+        await axios.delete(`${process.env.REACT_APP_API_URL}/hoteles/${selectedHotel}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -99,7 +99,7 @@ const Hotel = () => {
     }
     try {
       const response = await axios.get(
-        `http://localhost:3001/hoteles/name/${searchTerm}`,
+        `${process.env.REACT_APP_API_URL}/hoteles/name/${searchTerm}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

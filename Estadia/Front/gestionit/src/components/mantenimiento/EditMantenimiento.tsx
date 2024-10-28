@@ -36,17 +36,17 @@ const EditMaintenance = ({
     try {
       const [maintenanceResponse, materialResponse, maintenancesResponse] =
         await Promise.all([
-          axios.get(`http://localhost:3001/mantenimiento/${idMantenimiento}`, {
+          axios.get(`${process.env.REACT_APP_API_URL}/mantenimiento/${idMantenimiento}`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }),
-          axios.get("http://localhost:3001/material", {
+          axios.get(`${process.env.REACT_APP_API_URL}/material`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }),
-          axios.get("http://localhost:3001/mantenimiento", {
+          axios.get(`${process.env.REACT_APP_API_URL}/mantenimiento`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -133,7 +133,7 @@ const EditMaintenance = ({
     e.preventDefault();
     try {
       await axios.patch(
-        `http://localhost:3001/mantenimiento/${idMantenimiento}`,
+        `${process.env.REACT_APP_API_URL}/mantenimiento/${idMantenimiento}`,
         formData,
         {
           headers: {

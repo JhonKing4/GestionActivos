@@ -36,7 +36,7 @@ const AddDepartamento = ({
 
     try {
       await axios.post(
-        "http://localhost:3001/departamentos",
+        `${process.env.REACT_APP_API_URL}/departamentos`,
         formDataWithDefaults,
         {
           headers: {

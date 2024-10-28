@@ -28,7 +28,7 @@ const AddHotel = ({ isOpen, onClose, onHotelAdded }: AddHotelProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:3001/hoteles", formData, {
+      await axios.post(`${process.env.REACT_APP_API_URL}/hoteles`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
