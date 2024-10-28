@@ -159,6 +159,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
     console.log("Datos a enviar:", updatedMaterialData);
 
     try {
+      // Actualizar los datos del material
       const responseMaterial = await axios.patch(
         `${process.env.REACT_APP_API_URL}/material/${updatedMaterial.idMaterial}`,
         updatedMaterialData,
@@ -170,21 +171,24 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
       );
       const newMaterial = responseMaterial.data;
 
-      const relacionData = {
-        fk_material_padre: newMaterial.idMaterial,
-        fk_material_hijos: selectedMaterials.map((mat) => mat.idMaterial),
-        amount: 1,
-      };
-
+      // Mover la declaración de `existingRelation` fuera del bloque `if`
       const existingRelation = allRelations.find(
         (rel) => rel.materialPadre.idMaterial === newMaterial.idMaterial
       );
 
-      if (existingRelation) {
+      // Verificar si hay materiales hijos seleccionados
+      if (selectedMaterials.length > 0) {
+        const relacionData = {
+          fk_material_padre: newMaterial.idMaterial,
+          fk_material_hijos: selectedMaterials.map((mat) => mat.idMaterial),
+          amount: 1,
+        };
+
         if (
           existingRelation &&
           isValidUUID(existingRelation.idRelacionElement)
         ) {
+          // Actualiza la relación existente
           await axios.patch(
             `${process.env.REACT_APP_API_URL}/relacion-elements/${existingRelation.idRelacionElement}`,
             relacionData,
@@ -194,7 +198,9 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
               },
             }
           );
+          console.log("Relación existente actualizada.");
         } else {
+          // Crear nueva relación solo si no existe
           await axios.post(
             `${process.env.REACT_APP_API_URL}/relacion-elements`,
             relacionData,
@@ -204,23 +210,22 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
               },
             }
           );
-          console.log(
-            "Nueva relación creada debido a un ID inválido o relación no existente."
-          );
+          console.log("Nueva relación creada.");
         }
-      } else {
-        await axios.post(
-          `${process.env.REACT_APP_API_URL}/relacion-elements`,
-          relacionData,
+      } else if (selectedMaterials.length === 0 && existingRelation) {
+        // Si no hay materiales seleccionados y existe una relación previa, eliminarla
+        await axios.delete(
+          `${process.env.REACT_APP_API_URL}/relacion-elements/${existingRelation.idRelacionElement}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
-        console.log("Nueva relación creada.");
+        console.log("Relación eliminada debido a falta de materiales hijos.");
       }
 
+      // Actualizar la UI con el material editado
       onUpdate(newMaterial);
       onClose();
     } catch (error) {
