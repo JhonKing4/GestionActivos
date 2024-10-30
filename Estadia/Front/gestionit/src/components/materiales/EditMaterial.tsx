@@ -225,7 +225,6 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
         console.log("Relación eliminada debido a falta de materiales hijos.");
       }
 
-      // Actualizar la UI con el material editado
       onUpdate(newMaterial);
       onClose();
     } catch (error) {

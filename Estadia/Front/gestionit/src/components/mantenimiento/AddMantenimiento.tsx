@@ -93,11 +93,15 @@ const AddMaintenance = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/mantenimiento`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await axios.post(
+        `${process.env.REACT_APP_API_URL}/mantenimiento`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       onMaintenanceAdded();
       setFormData({
         description: "",
@@ -119,7 +123,7 @@ const AddMaintenance = ({
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content">
+      <div className="unique-modal modal-content">
         <div className="modal-header">
           <h2>Agregar Mantenimiento</h2>
           <button className="close-button" onClick={onClose}>
@@ -127,72 +131,79 @@ const AddMaintenance = ({
           </button>
         </div>
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="description">Descripción</label>
-            <input
-              type="text"
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="startDate">Fecha de Inicio</label>
-            <input
-              type="date"
-              id="startDate"
-              name="startDate"
-              value={formData.startDate}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="endDate">Fecha de Fin</label>
-            <input
-              type="date"
-              id="endDate"
-              name="endDate"
-              value={formData.endDate}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="typeMaintenance">Tipo de Mantenimiento</label>
-            <select
-              id="typeMaintenance"
-              name="typeMaintenance"
-              value={formData.typeMaintenance}
-              onChange={handleInputChange}
-              required
-            >
-              <option value={TypeMaintenance.Correctivo}>Correctivo</option>
-              <option value={TypeMaintenance.Preventivo}>Preventivo</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label>Materiales Disponibles</label>
-            <div className="checkbox-group">
-              {availableMaterials.length > 0 ? (
-                availableMaterials.map((material) => (
-                  <div key={material.idMaterial}>
-                    <input
-                      type="checkbox"
-                      id={`material-${material.idMaterial}`}
-                      value={material.idMaterial}
-                      onChange={handleMaterialChange}
-                    />
-                    <label htmlFor={`material-${material.idMaterial}`}>
-                      {material.name} - {material.serial_number}
-                    </label>
-                  </div>
-                ))
-              ) : (
-                <p>No hay materiales disponibles</p>
-              )}
+          <div className="modal-body">
+            <div className="left-column">
+              <div className="form-group">
+                <label htmlFor="description">Descripción</label>
+                <input
+                  type="text"
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="startDate">Fecha de Inicio</label>
+                <input
+                  type="date"
+                  id="startDate"
+                  name="startDate"
+                  value={formData.startDate}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="endDate">Fecha de Fin</label>
+                <input
+                  type="date"
+                  id="endDate"
+                  name="endDate"
+                  value={formData.endDate}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="typeMaintenance">Tipo de Mantenimiento</label>
+                <select
+                  id="typeMaintenance"
+                  name="typeMaintenance"
+                  value={formData.typeMaintenance}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value={TypeMaintenance.Correctivo}>Correctivo</option>
+                  <option value={TypeMaintenance.Preventivo}>Preventivo</option>
+                </select>
+              </div>
+            </div>
+            <div className="right-column">
+              <label>Materiales Disponibles</label>
+              <div className="checkbox-group">
+                {availableMaterials.length > 0 ? (
+                  availableMaterials.map((material) => (
+                    <div
+                      className="checkbox-group-item"
+                      key={material.idMaterial}
+                    >
+                      <label htmlFor={`material-${material.idMaterial}`}>
+                        {material.name} - {material.serial_number}
+                      </label>
+                      <input
+                        type="checkbox"
+                        id={`material-${material.idMaterial}`}
+                        value={material.idMaterial}
+                        onChange={handleMaterialChange}
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <p>No hay materiales disponibles</p>
+                )}
+              </div>
             </div>
           </div>
           <div className="button-group">

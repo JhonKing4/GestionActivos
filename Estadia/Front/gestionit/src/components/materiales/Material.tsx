@@ -279,7 +279,7 @@ const Material: React.FC = () => {
   const totalPages = Math.ceil(processedMaterials.length / itemsPerPage);
 
   if (loading) return <Loader />;
-  if (error) return <NotFound/>;
+  if (error) return <NotFound />;
 
   return (
     <div className="app-container">
@@ -454,6 +454,7 @@ const Material: React.FC = () => {
         onClose={async () => {
           setIsEditModalOpen(false);
           await fetchData();
+          window.location.reload();
         }}
         material={selectedMaterial || {}}
         onUpdate={async (updatedMaterial) => {
@@ -464,6 +465,7 @@ const Material: React.FC = () => {
           );
           setIsEditModalOpen(false);
           await fetchData();
+          window.location.reload();
         }}
       />
     </div>
