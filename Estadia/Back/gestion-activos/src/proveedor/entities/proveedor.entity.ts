@@ -55,6 +55,6 @@ export class Proveedor {
     uniqueItems: true,
     nullable: false,
   })
-  @Column({ type: 'varchar', length: 12, unique: true, nullable: false })
+  @Column({ type: 'varchar', length: 13, unique: true, nullable: false })
   rfc: string;
 }

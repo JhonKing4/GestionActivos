@@ -45,7 +45,7 @@ export class CreateProveedorDto {
     nullable: false,
   })
   @IsString()
-  @Length(12)
+  @Length(13)
   @IsNotEmpty()
   rfc: string;
 }
